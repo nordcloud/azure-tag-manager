@@ -35,6 +35,7 @@ type TagRules struct {
 }
 
 type Rule struct {
+	Name       string          `json:"name,omitempty"`
 	Conditions []ConditionItem `json:"conditions"`
 	Actions    []ActionItem    `json:"actions"`
 }

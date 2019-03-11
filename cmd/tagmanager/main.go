@@ -10,6 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func init() {
+	log.SetLevel(log.InfoLevel)
+}
+
 func main() {
 
 	if len(os.Args) < 2 {
@@ -36,12 +40,21 @@ func main() {
 		log.WithError(err).Fatalf("can't scan resources")
 	}
 
-	err = tagger.EvaluteRules(&res)
+	err = tagger.EvaluateRules(&res)
 	if err != nil {
 		log.WithError(err).Fatal("can't eval rules")
 	}
 
-	err = tagger.ExecuteActions()
+	for _, i := range tagger.Found {
+		r := i.Resource
+		log.Printf("👍  Rule '%s' found matching resource (%s) with ID = %s\n", i.TagRule.Name, *r.Name, r.ID)
+	}
+	if len(tagger.Found) > 0 {
+		log.Println("🔫  Starting executing actions on matched resources")
+		err = tagger.ExecuteActions()
+	} else {
+		log.Println("😫  No resources matched your conditions")
+	}
 
 	if err != nil {
 		log.WithError(err).Fatal("can't exec actions")

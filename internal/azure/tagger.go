@@ -10,9 +10,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Found stores
 type Found struct {
 	Actions  []rules.ActionItem
 	Resource tag.TaggableResource
+	TagRule  rules.Rule
 }
 
 type Tagger struct {
@@ -53,13 +55,34 @@ func (t *Tagger) InitActionMap() {
 
 func (t *Tagger) InitCondMap() {
 	t.condMap = tag.CondFuncMap{}
-	t.condMap["tagValue"] = func(p map[string]string, data *tag.TaggableResource) bool {
+
+	t.condMap["noTags"] = func(p map[string]string, data *tag.TaggableResource) bool {
+		if len(data.Tags) == 0 {
+			return true
+		}
+		return false
+	}
+
+	t.condMap["tagEqual"] = func(p map[string]string, data *tag.TaggableResource) bool {
 		tags := data.Tags
 		if len(tags) == 0 {
 			return false
 		}
 		for k, tag := range tags {
 			if p["tag"] == k && p["value"] == *tag {
+				return true
+			}
+		}
+		return false
+	}
+
+	t.condMap["tagNotEqual"] = func(p map[string]string, data *tag.TaggableResource) bool {
+		tags := data.Tags
+		if len(tags) == 0 {
+			return false
+		}
+		for k, tag := range tags {
+			if p["tag"] == k && p["value"] != *tag {
 				return true
 			}
 		}
@@ -116,20 +139,20 @@ func (t *Tagger) InitCondMap() {
 		}
 		return false
 	}
-
 }
 
 func (t Tagger) ExecuteActions() error {
 	for resID, found := range t.Found {
+		log.Printf("🚀  Executing actions rule '%s' on %s\n", found.TagRule.Name, resID)
 		for _, action := range found.Actions {
 			if t.dryRun == true {
-				log.Printf("\t🔥  DryRun Firing action %s on resource %s\n", action.GetType(), resID)
+				log.Printf("  🏜 (DryRun) [%s] Action %s (%s=%s)\n", found.TagRule.Name, action.GetType(), action["tag"], action["value"])
 			} else {
-				log.Printf("\t🔥  Firing action %s on resource %s\n", action.GetType(), resID)
+				log.Printf("  🚀  [%s] Action %s (%s=%s)\n", found.TagRule.Name, action.GetType(), action["tag"], action["value"])
 				resource := tag.TaggableResource{ID: resID}
 				err := t.Execute(&resource, action)
 				if err != nil {
-					fmt.Printf("Can't fire rule %s on %s\n", action.GetType(), resource.ID)
+					log.Errorf("Can't fire rule %s on %s\n", action.GetType(), resource.ID)
 				}
 			}
 		}
@@ -137,25 +160,22 @@ func (t Tagger) ExecuteActions() error {
 	return nil
 }
 
-func (t Tagger) EvaluteRules(resources *[]tag.TaggableResource) error {
+//EvaluateRules iterates over all rules and resources and checks which conditions are true. Resources for which the conditions match are saved into a tagger.Found structure
+func (t Tagger) EvaluateRules(resources *[]tag.TaggableResource) error {
 	var evaled bool
-	// iterate over resources
 
 	for _, resource := range *resources {
 		evaled = true
-		// log.Infof("🔍 checking resource: %s\n", resource.ID)
+		log.Debugf("🔍  Checking resource: %s (%s) \n", *resource.Name, resource.ID)
 		for _, y := range t.Rules.Rules {
 			for _, cond := range y.Conditions {
-
 				evaled = t.Eval(&resource, cond)
-
 				if !evaled {
 					break
 				}
 			}
 			if evaled {
-				log.Infof("👍  Conditions are %t for (%s) with ID = %s\n", evaled, *resource.Name, resource.ID)
-				found := Found{Actions: y.Actions, Resource: resource}
+				found := Found{Actions: y.Actions, Resource: resource, TagRule: y}
 				t.Found[resource.ID] = found
 			}
 		}

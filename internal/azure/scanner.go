@@ -21,6 +21,10 @@ type Scanner interface {
 	GetResources() ([]tagger.TaggableResource, error)
 }
 
+func String(v string) *string {
+	return &v
+}
+
 func (scanner ResourceGroupScanner) GetResources() ([]tagger.TaggableResource, error) {
 	grClient := resources.NewClient(scanner.Session.SubscriptionID)
 	grClient.Authorizer = scanner.Session.Authorizer
@@ -37,8 +41,10 @@ func (scanner ResourceGroupScanner) GetResources() ([]tagger.TaggableResource, e
 				err = errors.Wrap(err, "got error while traverising resources list")
 			}
 			resource := list.Value()
+			// fmt.Println(&rg)
+
 			tab = append(tab, tagger.TaggableResource{
-				Platform: "azure", ID: *resource.ID, Name: resource.Name, Region: *resource.Location, Tags: resource.Tags, ResourceGroup: &rg,
+				Platform: "azure", ID: *resource.ID, Name: resource.Name, Region: *resource.Location, Tags: resource.Tags, ResourceGroup: String(rg),
 			})
 		}
 	}
