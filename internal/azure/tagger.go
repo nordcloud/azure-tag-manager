@@ -103,6 +103,20 @@ func (t *Tagger) InitCondMap() {
 		return false
 	}
 
+	t.condMap["rgEqual"] = func(p map[string]string, data *tag.TaggableResource) bool {
+		if p["resourceGroup"] == *data.ResourceGroup {
+			return true
+		}
+		return false
+	}
+
+	t.condMap["rgNotEqual"] = func(p map[string]string, data *tag.TaggableResource) bool {
+		if p["resourceGroup"] != *data.ResourceGroup {
+			return true
+		}
+		return false
+	}
+
 }
 
 func (t Tagger) ExecuteActions() error {

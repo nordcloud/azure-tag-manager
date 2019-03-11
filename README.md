@@ -70,7 +70,17 @@ INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/669
 INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
 
 ```
+## Roadmap
 
+
+### Soon
+
+* Azure ARM policy setting 
+* New condition: `resourceGroup` to target resource groups
+
+### Later
+
+* AWS support for EC2
 
 
 ## Licence 
