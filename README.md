@@ -67,9 +67,6 @@ INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/669
 ```
 
 
-## Why the name? 
-
-[Pan Tadeusz](https://en.wikipedia.org/wiki/Pan_Tadeusz) by Adam Mickiewicz is a national poilish epic poem. `Pan Tadeusz` means `Sir Thadeus` and Pan `Tag`eusz is a pun on this (funny word play). 
 
 ## Licence 
 
