@@ -12,7 +12,7 @@ pipelines:
           - tar -cO --exclude-vcs --exclude=bitbucket-pipelines.yml . | tar -xv -C "${PACKAGE_PATH}"
           - cd "${PACKAGE_PATH}"
           - go get -u github.com/golang/dep/cmd/dep
-          - dep ensure
+          - dep ensure -v 
           - mkdir "${BITBUCKET_CLONE_DIR}/build"
           - GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}.osx cmd/pantageusz/main.go
           - GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}.linux cmd/pantageusz/main.go
@@ -31,7 +31,7 @@ pipelines:
             - tar -cO --exclude-vcs --exclude=bitbucket-pipelines.yml . | tar -xv -C "${PACKAGE_PATH}"
             - cd "${PACKAGE_PATH}"
             - go get -u github.com/golang/dep/cmd/dep
-            - dep ensure
+            - dep ensure -v
             - mkdir "${BITBUCKET_CLONE_DIR}/build"
             - GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.osx cmd/pantageusz/main.go
             - GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.linux cmd/pantageusz/main.go

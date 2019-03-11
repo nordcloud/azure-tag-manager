@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"bitbucket.org/nordcloud/pantageusz/internal/azure"
-	"bitbucket.org/nordcloud/pantageusz/internal/rules"
+	"bitbucket.org/nordcloud/tagmanager/internal/azure"
+	"bitbucket.org/nordcloud/tagmanager/internal/rules"
 
 	log "github.com/sirupsen/logrus"
 )

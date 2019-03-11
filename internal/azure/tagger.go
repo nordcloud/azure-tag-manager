@@ -3,9 +3,9 @@ package azure
 import (
 	"fmt"
 
-	"bitbucket.org/nordcloud/pantageusz/internal/azure/session"
-	"bitbucket.org/nordcloud/pantageusz/internal/rules"
-	tag "bitbucket.org/nordcloud/pantageusz/internal/tagger"
+	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
+	"bitbucket.org/nordcloud/tagmanager/internal/rules"
+	tag "bitbucket.org/nordcloud/tagmanager/internal/tagger"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )

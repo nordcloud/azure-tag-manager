@@ -3,8 +3,8 @@ package azure
 import (
 	"context"
 
-	"bitbucket.org/nordcloud/pantageusz/internal/azure/session"
-	"bitbucket.org/nordcloud/pantageusz/internal/tagger"
+	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
+	"bitbucket.org/nordcloud/tagmanager/internal/tagger"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	"github.com/pkg/errors"
 )
