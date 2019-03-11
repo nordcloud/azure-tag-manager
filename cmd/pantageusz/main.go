@@ -1,34 +1,26 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"bitbucket.org/nordcloud/pantageusz/internal/azure"
 	"bitbucket.org/nordcloud/pantageusz/internal/rules"
 
 	log "github.com/sirupsen/logrus"
 )
 
-var payload = `{
-	"rules":  [
-	"dryrun": true,
-	  {
-		  "conditions": [
-			  {"type": "tagValue", "tag": "darek", "value" : "dupa"},
-			  {"type": "tagExists", "tag": "darek7"},
-			  {"type": "tagNotExists", "tag": "env"}
-		  ], 
-		  "actions": [
-			  {"type": "addTag", "tag": "mucha", "value": "zoo" },
-			  {"type": "addTag", "tag": "mucha3", "value": "zoo" }
-		  ],
-	  }
-	  ]
-  }`
-
 func main() {
-	t, err := rules.NewRulesFromFile("mapper.json")
+
+	if len(os.Args) < 2 {
+		fmt.Println("Mapping file not given")
+		os.Exit(1)
+	}
+
+	t, err := rules.NewRulesFromFile(os.Args[1])
 
 	if err != nil {
-		log.WithError(err).Fatal("can't open rules file")
+		log.WithError(err).Fatalf("can't open rules file: %s", os.Args[1])
 	}
 
 	tagger, err := azure.NewAzureTagger(t)

@@ -13,6 +13,10 @@ type SimpleScanner struct {
 	Session *session.AzureSession
 }
 
+type ResourceGroupScanner struct {
+	Session *session.AzureSession
+}
+
 type Scanner interface {
 	GetResources() ([]tagger.TaggableResource, error)
 }

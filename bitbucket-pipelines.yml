@@ -1,0 +1,53 @@
+image: golang:1.12
+
+pipelines:
+  default:
+    - step:
+        caches:
+          - dep
+        script: # Modify the commands below to build your repository.
+          - APP_VERSION="${BITBUCKET_TAG}-${BITBUCKET_COMMIT:0:7}"
+          - PACKAGE_PATH="${GOPATH}/src/bitbucket.org/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}"          
+          - mkdir -pv "${PACKAGE_PATH}"
+          - tar -cO --exclude-vcs --exclude=bitbucket-pipelines.yml . | tar -xv -C "${PACKAGE_PATH}"
+          - cd "${PACKAGE_PATH}"
+          - go get -u github.com/golang/dep/cmd/dep
+          - dep ensure
+          - mkdir "${BITBUCKET_CLONE_DIR}/build"
+          - GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}.osx cmd/pantageusz/main.go
+          - GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}.linux cmd/pantageusz/main.go
+          - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}.exe cmd/pantageusz/main.go
+        artifacts:
+          - build/*
+  branches:
+    release/*:
+      - step:
+          caches:
+            - dep
+          script: # Modify the commands below to build your repository.
+            - APP_VERSION="${BITBUCKET_TAG}-${BITBUCKET_COMMIT:0:7}"
+            - PACKAGE_PATH="${GOPATH}/src/bitbucket.org/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}"          
+            - mkdir -pv "${PACKAGE_PATH}"
+            - tar -cO --exclude-vcs --exclude=bitbucket-pipelines.yml . | tar -xv -C "${PACKAGE_PATH}"
+            - cd "${PACKAGE_PATH}"
+            - go get -u github.com/golang/dep/cmd/dep
+            - dep ensure
+            - mkdir "${BITBUCKET_CLONE_DIR}/build"
+            - GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.osx cmd/pantageusz/main.go
+            - GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.linux cmd/pantageusz/main.go
+            - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.exe cmd/pantageusz/main.go
+          artifacts:
+            - build/*
+      - step:
+          name: Make CLI
+          deployment: production
+          script:
+            - echo "Generating CLI"
+            - APP_VERSION="${BITBUCKET_TAG}-${BITBUCKET_COMMIT:0:7}"
+            - ls ${BITBUCKET_CLONE_DIR}/build/
+            - curl -X POST --user "${BB_AUTH_STRING}" "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.osx"
+            - curl -X POST --user "${BB_AUTH_STRING}" "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.linux"
+            - curl -X POST --user "${BB_AUTH_STRING}" "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.exe"
+definitions:
+  caches:
+    dep: vendor/
