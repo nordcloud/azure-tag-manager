@@ -71,11 +71,11 @@ func (t *Tagger) InitCondMap() {
 		if len(tags) == 0 {
 			return false
 		}
-
 		if _, ok := tags[p["tag"]]; ok {
 			return true
 		}
 		return false
+
 	}
 
 	t.condMap["tagNotExists"] = func(p map[string]string, data *tag.TaggableResource) bool {
@@ -122,6 +122,7 @@ func (t Tagger) ExecuteActions() error {
 	}
 	return nil
 }
+
 func (t Tagger) EvaluteRules(resources *[]tag.TaggableResource) error {
 	var evaled bool
 	// iterate over resources
@@ -139,7 +140,7 @@ func (t Tagger) EvaluteRules(resources *[]tag.TaggableResource) error {
 				}
 			}
 			if evaled {
-				log.Infof("👍  Rules %t for %s\n", evaled, *resource.Name)
+				log.Infof("👍  Conditions are %t for (%s) with ID = %s\n", evaled, *resource.Name, resource.ID)
 				found := Found{Actions: y.Actions, Resource: resource}
 				t.Found[resource.ID] = found
 			}

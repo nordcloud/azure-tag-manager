@@ -55,6 +55,18 @@ As of today, the tag rewriter accepts four kinds of conditions:
 
 `./pantageusz mapping.json` 
 
+### Example run
+
+```
+
+➜  pantageusz git:(master) ✗ go run cmd/pantageusz/main.go
+INFO[0002] 👍  Conditions are true for (darek33) with ID = /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
+INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
+INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
+
+```
+
+
 ## Why the name? 
 
 [Pan Tadeusz](https://en.wikipedia.org/wiki/Pan_Tadeusz) by Adam Mickiewicz is a national poilish epic poem. `Pan Tadeusz` means `Sir Thadeus` and Pan `Tag`eusz is a pun on this (funny word play). 
