@@ -53,13 +53,13 @@ As of today, the tag rewriter accepts four kinds of conditions:
 
 ## Running 
 
-`./pantageusz mapping.json` 
+`./tagmanager mapping.json` 
 
 ### Example run
 
 ```
 
-➜  pantageusz git:(master) ✗ go run cmd/pantageusz/main.go
+➜  pantageusz git:(master) ✗ ./tagmanager mapping.json
 INFO[0002] 👍  Conditions are true for (darek33) with ID = /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
 INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
 INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
