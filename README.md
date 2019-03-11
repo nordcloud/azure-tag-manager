@@ -6,6 +6,11 @@ Currently the software works for Azure only.
 
 For Azure you need to create service principal.
 
+
+## Donwload
+
+You can download a binary for your architecture from https://bitbucket.org/nordcloud/tagmanager/downloads/ 
+
 ### Azure
 Create service principal file:
 
