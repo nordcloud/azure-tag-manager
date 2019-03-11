@@ -85,12 +85,12 @@ INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/669
 - support for checking for no tags `noTags` 
 - a less verbose debug level
 
+
 ## Todo 
 
 * Azure ARM policy setting 
 * Better CLI with flags
 * AWS support for EC2
-* No tags 
 
 ## Licence 
 
