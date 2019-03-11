@@ -25,6 +25,7 @@ Tag rewriter accepts the payload where rules are defined. Each rule has a list o
 
 ```json
 {
+  "dryrun": true,
   "rules":  [
     {
         "conditions": [
@@ -35,9 +36,8 @@ Tag rewriter accepts the payload where rules are defined. Each rule has a list o
         "actions": [
             {"type": "addTag", "tag": "mucha", "value": "zoo" },
             {"type": "addTag", "tag": "mucha3", "value": "zoo" }
-        ],
-        "dryrun": true
-    }
+        ]
+      }
     ]
 }
 ```
