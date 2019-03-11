@@ -79,11 +79,11 @@ INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/669
 ## Changelog
 
 0.2
-- support for named rules (you must use `name` to add a name for a rule)
-- support for a new condition check `rgEqual` and `rgNotEqual` to match resource groups 
-  the syntax is ` { "type": "rgEqual", "resourceGroup": "myRg" }`
-- support for checking for no tags `noTags` 
-- a less verbose debug level
+
+* support for named rules (you must use `name` to add a name for a rule)
+* support for a new condition check `rgEqual` and `rgNotEqual` to match resource groups   the syntax is ` { "type": "rgEqual", "resourceGroup": "myRg" }`
+* support for checking for no tags `noTags` 
+* a less verbose debug level
 
 
 ## Todo 
