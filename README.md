@@ -96,5 +96,5 @@ INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/669
 
 Dariusz Dwornikowski, 
 
-Nordcloud PAT team (Hold my 🍺, not your my 🐴🐴)
+Nordcloud PAT team (Hold my 🍺, not hold my 🐴🐴)
 
