@@ -29,7 +29,7 @@ func main() {
 		log.WithError(err).Fatal("Can't create tagger")
 	}
 
-	scanner := azure.SimpleScanner{Session: tagger.Session}
+	scanner := azure.ResourceGroupScanner{Session: tagger.Session}
 	res, err := scanner.GetResources()
 
 	if err != nil {

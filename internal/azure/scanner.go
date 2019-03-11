@@ -21,6 +21,47 @@ type Scanner interface {
 	GetResources() ([]tagger.TaggableResource, error)
 }
 
+func (scanner ResourceGroupScanner) GetResources() ([]tagger.TaggableResource, error) {
+	grClient := resources.NewClient(scanner.Session.SubscriptionID)
+	grClient.Authorizer = scanner.Session.Authorizer
+	groups, err := getGroups(scanner.Session)
+
+	if err != nil {
+		return nil, err
+	}
+	tab := make([]tagger.TaggableResource, 0)
+	// var err error
+	for _, rg := range groups {
+		for list, err := grClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.Next() {
+			if err != nil {
+				err = errors.Wrap(err, "got error while traverising resources list")
+			}
+			resource := list.Value()
+			tab = append(tab, tagger.TaggableResource{
+				Platform: "azure", ID: *resource.ID, Name: resource.Name, Region: *resource.Location, Tags: resource.Tags, ResourceGroup: &rg,
+			})
+		}
+	}
+
+	return tab, err
+}
+
+func getGroups(sess *session.AzureSession) ([]string, error) {
+	grClient := resources.NewGroupsClient(sess.SubscriptionID)
+	grClient.Authorizer = sess.Authorizer
+	tab := make([]string, 0)
+	var err error
+	for list, err := grClient.ListComplete(context.Background(), "", nil); list.NotDone(); err = list.Next() {
+		if err != nil {
+			err = errors.Wrap(err, "got error while traverising RG list")
+		}
+		rgName := *list.Value().Name
+		tab = append(tab, rgName)
+	}
+
+	return tab, err
+}
+
 func (scanner SimpleScanner) GetResources() ([]tagger.TaggableResource, error) {
 	grClient := resources.NewClient(scanner.Session.SubscriptionID)
 	grClient.Authorizer = scanner.Session.Authorizer
