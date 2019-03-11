@@ -8,6 +8,7 @@ import (
 	"bitbucket.org/nordcloud/tagmanager/internal/tagger"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 func (t Tagger) createOrUpdateTag(id, tag, value string) error {
@@ -40,6 +41,7 @@ func (t *Tagger) Execute(data *tagger.TaggableResource, p rules.ActionItem) erro
 	if val, ok := t.actionMap[p.GetType()]; ok {
 		return val(p, data)
 	}
+	log.Warnf("Unknown action type %s", p.GetType())
 	return nil
 }
 
@@ -48,5 +50,6 @@ func (t *Tagger) Eval(data *tagger.TaggableResource, p rules.ConditionItem) bool
 	if val, ok := t.condMap[p.GetType()]; ok {
 		return val(p, data)
 	}
+	log.Warnf("Unknown condition type %s", p.GetType())
 	return false
 }
