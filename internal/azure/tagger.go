@@ -22,7 +22,7 @@ type Tagger struct {
 	Found     map[string]Found
 	condMap   tag.CondFuncMap
 	actionMap tag.ActionFuncMap
-	dryRun    bool
+	DryRun    bool
 	Rules     rules.TagRules
 }
 
@@ -35,7 +35,7 @@ func NewAzureTagger(ruleDef *rules.TagRules) (*Tagger, error) {
 		return nil, errors.Wrap(err, "can't create tagger")
 	}
 	tagger.Rules = *ruleDef
-	tagger.dryRun = *ruleDef.DryRun
+	tagger.DryRun = *ruleDef.DryRun
 	tagger.InitActionMap()
 	tagger.InitCondMap()
 	tagger.Found = map[string]Found{}
@@ -145,7 +145,7 @@ func (t Tagger) ExecuteActions() error {
 	for resID, found := range t.Found {
 		log.Printf("🚀  Executing actions rule '%s' on %s\n", found.TagRule.Name, resID)
 		for _, action := range found.Actions {
-			if t.dryRun == true {
+			if t.DryRun == true {
 				log.Printf("  🏜 (DryRun) [%s] Action %s (%s=%s)\n", found.TagRule.Name, action.GetType(), action["tag"], action["value"])
 			} else {
 				log.Printf("  🚀  [%s] Action %s (%s=%s)\n", found.TagRule.Name, action.GetType(), action["tag"], action["value"])
