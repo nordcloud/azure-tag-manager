@@ -1,11 +1,6 @@
 package session
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"log"
-	"os"
-
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
@@ -18,16 +13,16 @@ type AzureSession struct {
 	Authorizer     autorest.Authorizer
 }
 
-func readJSON(path string) (*map[string]interface{}, error) {
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Fatalf("failed to read file: %v", err)
-	}
+// func readJSON(path string) (*map[string]interface{}, error) {
+// 	data, err := ioutil.ReadFile(path)
+// 	if err != nil {
+// 		log.Fatalf("failed to read file: %v", err)
+// 	}
 
-	contents := make(map[string]interface{})
-	json.Unmarshal(data, &contents)
-	return &contents, nil
-}
+// 	contents := make(map[string]interface{})
+// 	json.Unmarshal(data, &contents)
+// 	return &contents, nil
+// }
 
 //NewSessionFromFile creates new session from file kept in AZURE_AUTH_LOCATION
 func NewSessionFromFile() (*AzureSession, error) {
@@ -37,10 +32,11 @@ func NewSessionFromFile() (*AzureSession, error) {
 		err = errors.Wrap(err, "cannot get initial session")
 		return nil, err
 	}
-	authInfo, err := readJSON(os.Getenv("AZURE_AUTH_LOCATION"))
+
+	a, err := auth.GetSettingsFromFile()
 
 	sess := AzureSession{
-		SubscriptionID: (*authInfo)["subscriptionId"].(string),
+		SubscriptionID: a.GetSubscriptionID(),
 		Authorizer:     authorizer,
 	}
 
