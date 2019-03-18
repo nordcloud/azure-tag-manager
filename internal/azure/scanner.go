@@ -9,41 +9,55 @@ import (
 	"github.com/pkg/errors"
 )
 
-type SimpleScanner struct {
-	Session *session.AzureSession
-}
-
 type ResourceGroupScanner struct {
-	Session *session.AzureSession
+	Session         *session.AzureSession
+	ResourcesClient *resources.Client
+	GroupsClient    *resources.GroupsClient
 }
 
 type Scanner interface {
-	GetResources() ([]tagger.TaggableResource, error)
+	GetResources() ([]tagger.Resource, error)
+	GetResourcesByResourceGroup(string) ([]tagger.Resource, error)
+	GetGroups()
 }
 
 func String(v string) *string {
 	return &v
 }
 
-func (scanner ResourceGroupScanner) GetResources() ([]tagger.TaggableResource, error) {
-	grClient := resources.NewClient(scanner.Session.SubscriptionID)
-	grClient.Authorizer = scanner.Session.Authorizer
-	groups, err := getGroups(scanner.Session)
+func NewResourceGroupScanner(session *session.AzureSession) *ResourceGroupScanner {
+	resClient := resources.NewClient(session.SubscriptionID)
+	resClient.Authorizer = session.Authorizer
+	grClient := resources.NewGroupsClient(session.SubscriptionID)
+	grClient.Authorizer = session.Authorizer
+
+	scanner := &ResourceGroupScanner{
+		Session:         session,
+		ResourcesClient: &resClient,
+		GroupsClient:    &grClient,
+	}
+
+	return scanner
+}
+
+func (scanner ResourceGroupScanner) GetResources() ([]tagger.Resource, error) {
+
+	groups, err := scanner.GetGroups()
 
 	if err != nil {
 		return nil, err
 	}
-	tab := make([]tagger.TaggableResource, 0)
+	tab := make([]tagger.Resource, 0)
 	// var err error
 	for _, rg := range groups {
-		for list, err := grClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.Next() {
+		for list, err := scanner.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.Next() {
 			if err != nil {
 				err = errors.Wrap(err, "got error while traverising resources list")
 			}
 			resource := list.Value()
 			// fmt.Println(&rg)
 
-			tab = append(tab, tagger.TaggableResource{
+			tab = append(tab, tagger.Resource{
 				Platform: "azure", ID: *resource.ID, Name: resource.Name, Region: *resource.Location, Tags: resource.Tags, ResourceGroup: String(rg),
 			})
 		}
@@ -52,12 +66,10 @@ func (scanner ResourceGroupScanner) GetResources() ([]tagger.TaggableResource, e
 	return tab, err
 }
 
-func getGroups(sess *session.AzureSession) ([]string, error) {
-	grClient := resources.NewGroupsClient(sess.SubscriptionID)
-	grClient.Authorizer = sess.Authorizer
+func (scanner ResourceGroupScanner) GetGroups() ([]string, error) {
 	tab := make([]string, 0)
 	var err error
-	for list, err := grClient.ListComplete(context.Background(), "", nil); list.NotDone(); err = list.Next() {
+	for list, err := scanner.GroupsClient.ListComplete(context.Background(), "", nil); list.NotDone(); err = list.Next() {
 		if err != nil {
 			err = errors.Wrap(err, "got error while traverising RG list")
 		}
@@ -68,18 +80,18 @@ func getGroups(sess *session.AzureSession) ([]string, error) {
 	return tab, err
 }
 
-func (scanner SimpleScanner) GetResources() ([]tagger.TaggableResource, error) {
-	grClient := resources.NewClient(scanner.Session.SubscriptionID)
-	grClient.Authorizer = scanner.Session.Authorizer
+func (scanner ResourceGroupScanner) GetResourcesByResourceGroup(rg string) ([]tagger.Resource, error) {
 
-	tab := make([]tagger.TaggableResource, 0)
+	tab := make([]tagger.Resource, 0)
 	var err error
-	for list, err := grClient.ListComplete(context.Background(), "", "", nil); list.NotDone(); err = list.Next() {
+
+	for list, err := scanner.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.Next() {
 		if err != nil {
-			err = errors.Wrap(err, "got error while traverising resources list")
+			return nil, errors.Wrap(err, "got error while traversing resources list")
 		}
+
 		resource := list.Value()
-		tab = append(tab, tagger.TaggableResource{
+		tab = append(tab, tagger.Resource{
 			Platform: "azure", ID: *resource.ID, Name: resource.Name, Region: *resource.Location, Tags: resource.Tags,
 		})
 	}
