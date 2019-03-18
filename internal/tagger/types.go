@@ -1,9 +1,9 @@
 package tagger
 
-type CondFuncMap map[string]func(p map[string]string, data *TaggableResource) bool
-type ActionFuncMap map[string]func(p map[string]string, data *TaggableResource) error
+type CondFuncMap map[string]func(p map[string]string, data *Resource) bool
+type ActionFuncMap map[string]func(p map[string]string, data *Resource) error
 
-type TaggableResource struct {
+type Resource struct {
 	Platform      string
 	Name          *string
 	Region        string

@@ -37,7 +37,7 @@ func (t Tagger) createOrUpdateTag(id, tag, value string) error {
 	return err
 }
 
-func (t *Tagger) Execute(data *tagger.TaggableResource, p rules.ActionItem) error {
+func (t *Tagger) Execute(data *tagger.Resource, p rules.ActionItem) error {
 	if val, ok := t.actionMap[p.GetType()]; ok {
 		return val(p, data)
 	}
@@ -45,7 +45,7 @@ func (t *Tagger) Execute(data *tagger.TaggableResource, p rules.ActionItem) erro
 	return nil
 }
 
-func (t *Tagger) Eval(data *tagger.TaggableResource, p rules.ConditionItem) bool {
+func (t *Tagger) Eval(data *tagger.Resource, p rules.ConditionItem) bool {
 
 	if val, ok := t.condMap[p.GetType()]; ok {
 		return val(p, data)
