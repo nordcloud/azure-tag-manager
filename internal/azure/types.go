@@ -1,7 +1,4 @@
-package tagger
-
-type CondFuncMap map[string]func(p map[string]string, data *Resource) bool
-type ActionFuncMap map[string]func(p map[string]string, data *Resource) error
+package azure
 
 type Resource struct {
 	Platform      string
@@ -11,3 +8,6 @@ type Resource struct {
 	Tags          map[string]*string
 	ResourceGroup *string
 }
+
+type condFuncMap map[string]func(p map[string]string, data *Resource) bool
+type actionFuncMap map[string]func(p map[string]string, data *Resource) error

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
-	"bitbucket.org/nordcloud/tagmanager/internal/tagger"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	"github.com/pkg/errors"
 )
@@ -16,23 +15,24 @@ type ResourceGroupScanner struct {
 }
 
 type Scanner interface {
-	GetResources() ([]tagger.Resource, error)
-	GetResourcesByResourceGroup(string) ([]tagger.Resource, error)
-	GetGroups()
+	GetResources() ([]Resource, error)
+	GetResourcesByResourceGroup(string) ([]Resource, error)
+	GetGroups() ([]string, error)
 }
 
 func String(v string) *string {
 	return &v
 }
 
-func NewResourceGroupScanner(session *session.AzureSession) *ResourceGroupScanner {
-	resClient := resources.NewClient(session.SubscriptionID)
-	resClient.Authorizer = session.Authorizer
-	grClient := resources.NewGroupsClient(session.SubscriptionID)
-	grClient.Authorizer = session.Authorizer
+func NewResourceGroupScanner(s *session.AzureSession) *ResourceGroupScanner {
+	resClient := resources.NewClient(s.SubscriptionID)
+	resClient.Authorizer = s.Authorizer
+
+	grClient := resources.NewGroupsClient(s.SubscriptionID)
+	grClient.Authorizer = s.Authorizer
 
 	scanner := &ResourceGroupScanner{
-		Session:         session,
+		Session:         s,
 		ResourcesClient: &resClient,
 		GroupsClient:    &grClient,
 	}
@@ -40,61 +40,64 @@ func NewResourceGroupScanner(session *session.AzureSession) *ResourceGroupScanne
 	return scanner
 }
 
-func (scanner ResourceGroupScanner) GetResources() ([]tagger.Resource, error) {
-
-	groups, err := scanner.GetGroups()
-
+func (r ResourceGroupScanner) GetResources() ([]Resource, error) {
+	groups, err := r.GetGroups()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not obtain groups")
 	}
-	tab := make([]tagger.Resource, 0)
-	// var err error
-	for _, rg := range groups {
-		for list, err := scanner.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.Next() {
-			if err != nil {
-				err = errors.Wrap(err, "got error while traverising resources list")
-			}
-			resource := list.Value()
-			// fmt.Println(&rg)
 
-			tab = append(tab, tagger.Resource{
-				Platform: "azure", ID: *resource.ID, Name: resource.Name, Region: *resource.Location, Tags: resource.Tags, ResourceGroup: String(rg),
+	tab := make([]Resource, 0)
+	for _, rg := range groups {
+		for list, err := r.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.NextWithContext(context.Background()) {
+			if err != nil {
+				return nil, errors.Wrap(err, "got error while traversing resources list")
+			}
+
+			resource := list.Value()
+			tab = append(tab, Resource{
+				Platform:      "azure",
+				ID:            *resource.ID,
+				Name:          resource.Name,
+				Region:        *resource.Location,
+				Tags:          resource.Tags,
+				ResourceGroup: String(rg),
 			})
 		}
 	}
 
-	return tab, err
+	return tab, nil
 }
 
-func (scanner ResourceGroupScanner) GetGroups() ([]string, error) {
+func (r ResourceGroupScanner) GetGroups() ([]string, error) {
 	tab := make([]string, 0)
-	var err error
-	for list, err := scanner.GroupsClient.ListComplete(context.Background(), "", nil); list.NotDone(); err = list.Next() {
+	for list, err := r.GroupsClient.ListComplete(context.Background(), "", nil); list.NotDone(); err = list.NextWithContext(context.Background()) {
 		if err != nil {
-			err = errors.Wrap(err, "got error while traverising RG list")
+			return nil, errors.Wrap(err, "got error while traverising RG list")
 		}
+
 		rgName := *list.Value().Name
 		tab = append(tab, rgName)
 	}
 
-	return tab, err
+	return tab, nil
 }
 
-func (scanner ResourceGroupScanner) GetResourcesByResourceGroup(rg string) ([]tagger.Resource, error) {
-
-	tab := make([]tagger.Resource, 0)
-	var err error
-
-	for list, err := scanner.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.Next() {
+func (r ResourceGroupScanner) GetResourcesByResourceGroup(rg string) ([]Resource, error) {
+	tab := make([]Resource, 0)
+	for list, err := r.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.NextWithContext(context.Background()) {
 		if err != nil {
 			return nil, errors.Wrap(err, "got error while traversing resources list")
 		}
 
 		resource := list.Value()
-		tab = append(tab, tagger.Resource{
-			Platform: "azure", ID: *resource.ID, Name: resource.Name, Region: *resource.Location, Tags: resource.Tags,
+		tab = append(tab, Resource{
+			Platform: "azure",
+			ID:       *resource.ID,
+			Name:     resource.Name,
+			Region:   *resource.Location,
+			Tags:     resource.Tags,
 		})
 	}
 
-	return tab, err
+	return tab, nil
 }

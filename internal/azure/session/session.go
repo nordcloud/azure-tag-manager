@@ -24,17 +24,14 @@ type AzureSession struct {
 // 	return &contents, nil
 // }
 
-//NewSessionFromFile creates new session from file kept in AZURE_AUTH_LOCATION
-func NewSessionFromFile() (*AzureSession, error) {
+// NewFromFile creates new session from file kept in AZURE_AUTH_LOCATION.
+func NewFromFile() (*AzureSession, error) {
 	authorizer, err := auth.NewAuthorizerFromFile(azure.PublicCloud.ResourceManagerEndpoint)
-
 	if err != nil {
-		err = errors.Wrap(err, "cannot get initial session")
-		return nil, err
+		return nil, errors.Wrap(err, "cannot get initial session")
 	}
 
 	a, err := auth.GetSettingsFromFile()
-
 	sess := AzureSession{
 		SubscriptionID: a.GetSubscriptionID(),
 		Authorizer:     authorizer,

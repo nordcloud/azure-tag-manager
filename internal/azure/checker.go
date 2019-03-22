@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
-	"bitbucket.org/nordcloud/tagmanager/internal/tagger"
 )
 
 type TagChecker struct {
@@ -13,30 +12,34 @@ type TagChecker struct {
 	DryRun  bool
 }
 
-func (t TagChecker) CheckResourceGroup(resources []tagger.Resource) map[string][]tagger.Resource {
-	var tagseen map[string]string
-	var noncompliant map[string][]tagger.Resource
-	noncompliant = make(map[string][]tagger.Resource)
-	tagseen = make(map[string]string)
-	// var noncompliance map[string][]string
+func (t TagChecker) CheckResourceGroup(resources []Resource) map[string][]Resource {
+	var (
+		nonCompliant = make(map[string][]Resource)
+		tagSeen      = make(map[string]string)
+	)
+
 	for _, resource := range resources {
 		for key, value := range resource.Tags {
-			if _, ok := tagseen[key]; ok {
+			if _, ok := tagSeen[key]; ok {
 				fmt.Println(key)
-				if tagseen[key] != *value {
-					fmt.Printf("Non compliance !! seen tag (%s=%s) != (%s=%s)\n", key, tagseen[key], key, *value)
-					noncompliant[key] = append(noncompliant[key], resource)
+				if tagSeen[key] != *value {
+					fmt.Printf("Non compliance !! seen tag (%s=%s) != (%s=%s)\n", key, tagSeen[key], key, *value)
+					nonCompliant[key] = append(nonCompliant[key], resource)
 					// fmt.Printf("Non compliant resources %v", resource)
 				}
 			} else {
-				tagseen[key] = *value
+				tagSeen[key] = *value
 			}
 		}
 	}
-	return noncompliant
+
+	return nonCompliant
 }
 
-func NewAzureChecker() *TagChecker {
-	checker := &TagChecker{}
-	return checker
+func NewAzureChecker(s *session.AzureSession) *TagChecker {
+	checker := TagChecker{
+		Session: s,
+	}
+
+	return &checker
 }
