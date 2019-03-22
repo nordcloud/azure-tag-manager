@@ -10,16 +10,17 @@ import (
 )
 
 func Check(c Config) error {
-	if c.DryRun {
-		fmt.Println("🤡 🤡  Running in a dry run")
-	}
-
 	sess, err := session.NewFromFile()
 	if err != nil {
 		return errors.Wrap(err, "could not create session")
 	}
 
 	checker := azure.NewAzureChecker(sess)
+	if c.DryRun {
+		checker.DryRun()
+		fmt.Println("    Running in a dry run")
+	}
+
 	scanner := azure.NewResourceGroupScanner(sess)
 
 	// @TODO
