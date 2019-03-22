@@ -9,9 +9,12 @@ import (
 type TagChecker struct {
 	Session *session.AzureSession
 	Found   map[string]Found
-	DryRun  bool
+	dryRun  bool
 }
 
+func (t *TagChecker) DryRun() {
+	t.dryRun = true
+}
 func (t TagChecker) CheckResourceGroup(resources []Resource) map[string][]Resource {
 	var (
 		nonCompliant = make(map[string][]Resource)
