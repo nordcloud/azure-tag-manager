@@ -7,26 +7,17 @@ import (
 	"github.com/pkg/errors"
 )
 
-func NewRulesFromFile(filename string) (*TagRules, error) {
+func NewFromFile(filename string) (TagRules, error) {
 	dat, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, errors.Wrap(err, "error opening the file")
+		return TagRules{}, errors.Wrap(err, "error opening the file")
 	}
-	return NewRulesFromString(string(dat))
+
+	return NewFromString(string(dat))
 }
 
-func NewRulesFromString(rulesDef string) (*TagRules, error) {
+func NewFromString(rulesDef string) (TagRules, error) {
 	return parseRulesDefinitions(rulesDef)
-}
-
-func parseRulesDefinitions(rules string) (*TagRules, error) {
-	var rulesDef TagRules
-	byt := []byte(rules)
-	if err := json.Unmarshal(byt, &rulesDef); err != nil {
-		return nil, errors.Wrap(err, "can't unmarshal rules")
-	}
-
-	return &rulesDef, nil
 }
 
 type TagRules struct {
@@ -42,8 +33,6 @@ type Rule struct {
 
 type ConditionItem map[string]string
 
-type ActionItem map[string]string
-
 func (p ConditionItem) GetType() string {
 	if val, ok := p["type"]; ok {
 		return val
@@ -51,9 +40,21 @@ func (p ConditionItem) GetType() string {
 	return ""
 }
 
+type ActionItem map[string]string
+
 func (p ActionItem) GetType() string {
 	if val, ok := p["type"]; ok {
 		return val
 	}
 	return ""
+}
+
+func parseRulesDefinitions(rules string) (TagRules, error) {
+	var rulesDef TagRules
+	byt := []byte(rules)
+	if err := json.Unmarshal(byt, &rulesDef); err != nil {
+		return TagRules{}, errors.Wrap(err, "can't unmarshal rules")
+	}
+
+	return rulesDef, nil
 }
