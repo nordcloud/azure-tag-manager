@@ -63,13 +63,19 @@ As of today, the tag rewriter accepts four kinds of conditions (all are case sen
 
 ## Running 
 
-`./tagmanager mapping.json` 
+`./tagmanager -c rew -m mapping.json --dry --verbose`
+
+* `-c` - choose mode of operation: `rew` is for tag rewriting, `check` is for doing sanity checks (not yet implemented)
+* `--dry` - will run in a dry mode - no changes will be made 
+* `-m FILE` - path to the file with rules, used only in rew mode
+* `--verbose` - show more logs
+
 
 ### Example run
 
 ```
 
-➜  pantageusz git:(master) ✗ ./tagmanager mapping.json
+➜  pantageusz git:(master) ✗  ./tagmanager -c rew -m mapping.json --dry --verbose
 INFO[0002] 👍  Conditions are true for (darek33) with ID = /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
 INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
 INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
@@ -89,7 +95,6 @@ INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/669
 ## Todo 
 
 * Azure ARM policy setting 
-* Better CLI with flags
 * AWS support for EC2
 
 ## Licence 
