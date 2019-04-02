@@ -10,14 +10,16 @@ import (
 )
 
 const (
-	usageVerbosity   = "Use for verbose (diagnostic) output"
-	usageMappingFile = "Location of the tag rules definition (json)"
-	usageDryRun      = "The tagger will not execute any actions"
-	usageCommand     = "A mode of operation - choose (rew or check)"
+	usageVerbosity     = "Use for verbose (diagnostic) output"
+	usageMappingFile   = "Location of the tag rules definition (json)"
+	usageDryRun        = "The tagger will not execute any actions"
+	usageCommand       = "A mode of operation - choose (rew or check)"
+	usageResourceGroup = "Specifies resource group"
+)
 
-	rewriteCommand = "rew"
-
-	checkCommand = "check"
+const (
+	commandRewrite = "rew"
+	commandCheck   = "check"
 )
 
 var (
@@ -25,13 +27,15 @@ var (
 	dryRunEnabled  bool
 	verboseEnabled bool
 	command        string
+	resourceGroup  string
 )
 
 func init() {
 	flag.BoolVar(&verboseEnabled, "verbose", false, usageVerbosity)
 	flag.StringVarP(&mappingFile, "map", "m", "", usageMappingFile)
 	flag.BoolVar(&dryRunEnabled, "dry", false, usageDryRun)
-	flag.StringVarP(&command, "command", "c", checkCommand, usageCommand)
+	flag.StringVarP(&command, "command", "c", commandCheck, usageCommand)
+	flag.StringVarP(&resourceGroup, "resourceGroup", "r", "", usageResourceGroup)
 	flag.Parse()
 
 	if verboseEnabled {
@@ -40,27 +44,32 @@ func init() {
 		log.SetLevel(log.ErrorLevel)
 	}
 
-	if command == rewriteCommand && mappingFile == "" {
-		log.Error("Command rewrite needs a file given (-m)")
+	if command == commandRewrite && mappingFile == "" {
+		log.Fatal("Command rewrite needs a file given (-m)")
+	}
+
+	if command == commandCheck && resourceGroup == "" {
+		log.Fatal("Command check needs resource group to be specified (-r)")
 	}
 }
 
 func main() {
 	c := commands.Config{
-		MappingFile: mappingFile,
-		DryRun:      dryRunEnabled,
+		MappingFile:   mappingFile,
+		DryRun:        dryRunEnabled,
+		ResourceGroup: resourceGroup,
 	}
 
 	switch command {
-	case rewriteCommand:
+	case commandRewrite:
 		err := commands.Rewrite(c)
 		if err != nil {
-			log.Error(errors.Wrap(err, "could not execute rewrite command"))
+			log.Fatal(errors.Wrap(err, "could not execute rewrite command"))
 		}
-	case checkCommand:
+	case commandCheck:
 		err := commands.Check(c)
 		if err != nil {
-			log.Error(errors.Wrap(err, "could not execute check command"))
+			log.Fatal(errors.Wrap(err, "could not execute check command"))
 		}
 	}
 }
