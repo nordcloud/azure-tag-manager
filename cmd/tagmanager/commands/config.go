@@ -1,6 +1,7 @@
 package commands
 
 type Config struct {
-	MappingFile string
-	DryRun      bool
+	MappingFile   string
+	DryRun        bool
+	ResourceGroup string
 }
