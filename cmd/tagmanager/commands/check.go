@@ -23,10 +23,8 @@ func Check(c Config) error {
 
 	scanner := azure.NewResourceGroupScanner(sess)
 
-	// @TODO
-	rg := "darek"
-	fmt.Println("checking group", rg)
-	res, err := scanner.GetResourcesByResourceGroup(rg)
+	fmt.Println("checking group", c.ResourceGroup)
+	res, err := scanner.GetResourcesByResourceGroup(c.ResourceGroup)
 	if err != nil {
 		return errors.Wrap(err, "could not get resources by group")
 	}

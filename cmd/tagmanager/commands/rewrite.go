@@ -7,18 +7,17 @@ import (
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/rules"
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 func Rewrite(c Config) error {
 	t, err := rules.NewFromFile(c.MappingFile)
 	if err != nil {
-		log.Errorf("Can't parse rules from %s: %s\n", c.MappingFile, err)
+		return errors.Wrapf(err, "Can't parse rules from %s", c.MappingFile)
 	}
 
 	sess, err := session.NewFromFile()
 	if err != nil {
-		log.Error(errors.Wrap(err, "could not create session"))
+		return errors.Wrap(err, "could not create session")
 	}
 
 	tagger := azure.NewTagger(t, sess)
@@ -28,18 +27,18 @@ func Rewrite(c Config) error {
 	}
 
 	if err != nil {
-		log.Error(errors.Wrap(err, "Can't create tagger"))
+		return errors.Wrap(err, "Can't create tagger")
 	}
 
 	scanner := azure.NewResourceGroupScanner(tagger.Session)
 	res, err := scanner.GetResources()
 	if err != nil {
-		log.Error(errors.Wrap(err, "can't scan resources"))
+		return errors.Wrap(err, "can't scan resources")
 	}
 
 	err = tagger.EvaluateRules(res)
 	if err != nil {
-		log.Error(errors.Wrap(err, "can't eval rules"))
+		return errors.Wrap(err, "can't eval rules")
 	}
 
 	for _, i := range tagger.Found {
@@ -50,7 +49,7 @@ func Rewrite(c Config) error {
 	if len(tagger.Found) > 0 {
 		fmt.Println("🔫  Starting executing actions on matched resources")
 		if err := tagger.ExecuteActions(); err != nil {
-			log.Error(errors.Wrap(err, "can't exec actions"))
+			return errors.Wrap(err, "can't exec actions")
 		}
 	} else {
 		fmt.Println("😫  No resources matched your conditions")
