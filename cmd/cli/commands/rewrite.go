@@ -9,10 +9,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-func Rewrite(c Config) error {
-	t, err := rules.NewFromFile(c.MappingFile)
+type RewriteCommand struct{}
+
+func (r *RewriteCommand) Execute(cfg Config) error {
+	t, err := rules.NewFromFile(cfg.MappingFile)
 	if err != nil {
-		return errors.Wrapf(err, "Can't parse rules from %s", c.MappingFile)
+		return errors.Wrapf(err, "Can't parse rules from %s", cfg.MappingFile)
 	}
 
 	sess, err := session.NewFromFile()
@@ -21,7 +23,7 @@ func Rewrite(c Config) error {
 	}
 
 	tagger := azure.NewTagger(t, sess)
-	if c.DryRun {
+	if cfg.DryRun {
 		tagger.DryRun()
 		fmt.Println("    Running in a dry run")
 	}
@@ -53,6 +55,14 @@ func Rewrite(c Config) error {
 		}
 	} else {
 		fmt.Println("😫  No resources matched your conditions")
+	}
+
+	return nil
+}
+
+func (r *RewriteCommand) Validate(cfg Config) error {
+	if cfg.MappingFile == "" {
+		return errors.New("need a mapping file given (-m)")
 	}
 
 	return nil

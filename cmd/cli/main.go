@@ -1,9 +1,8 @@
 package main
 
 import (
+	"bitbucket.org/nordcloud/tagmanager/cmd/cli/commands"
 	"github.com/pkg/errors"
-
-	"bitbucket.org/nordcloud/tagmanager/cmd/tagmanager/commands"
 
 	log "github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
@@ -43,33 +42,23 @@ func init() {
 	} else {
 		log.SetLevel(log.ErrorLevel)
 	}
-
-	if command == commandRewrite && mappingFile == "" {
-		log.Fatal("Command rewrite needs a file given (-m)")
-	}
-
-	if command == commandCheck && resourceGroup == "" {
-		log.Fatal("Command check needs resource group to be specified (-r)")
-	}
 }
 
 func main() {
-	c := commands.Config{
+	cfg := commands.Config{
 		MappingFile:   mappingFile,
 		DryRun:        dryRunEnabled,
 		ResourceGroup: resourceGroup,
 	}
 
-	switch command {
-	case commandRewrite:
-		err := commands.Rewrite(c)
-		if err != nil {
-			log.Fatal(errors.Wrap(err, "could not execute rewrite command"))
-		}
-	case commandCheck:
-		err := commands.Check(c)
-		if err != nil {
-			log.Fatal(errors.Wrap(err, "could not execute check command"))
-		}
+	pool := commands.Pool{
+		Commands: map[string]commands.Command{
+			commandCheck:   &commands.CheckCommand{},
+			commandRewrite: &commands.RewriteCommand{},
+		},
+	}
+
+	if err := pool.Execute(cfg, command); err != nil {
+		log.Fatal(errors.Wrap(err, "could not execute command"))
 	}
 }
