@@ -9,22 +9,24 @@ import (
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
 )
 
-func Check(c Config) error {
+type CheckCommand struct{}
+
+func (c *CheckCommand) Execute(cfg Config) error {
 	sess, err := session.NewFromFile()
 	if err != nil {
 		return errors.Wrap(err, "could not create session")
 	}
 
 	checker := azure.NewAzureChecker(sess)
-	if c.DryRun {
+	if cfg.DryRun {
 		checker.DryRun()
 		fmt.Println("    Running in a dry run")
 	}
 
 	scanner := azure.NewResourceGroupScanner(sess)
 
-	fmt.Println("checking group", c.ResourceGroup)
-	res, err := scanner.GetResourcesByResourceGroup(c.ResourceGroup)
+	fmt.Println("checking group", cfg.ResourceGroup)
+	res, err := scanner.GetResourcesByResourceGroup(cfg.ResourceGroup)
 	if err != nil {
 		return errors.Wrap(err, "could not get resources by group")
 	}
@@ -35,6 +37,14 @@ func Check(c Config) error {
 		for _, nonr := range nonrList {
 			fmt.Println(nonr)
 		}
+	}
+
+	return nil
+}
+
+func (c *CheckCommand) Validate(cfg Config) error {
+	if cfg.ResourceGroup == "" {
+		return errors.New("need resource group to be specified (-r)")
 	}
 
 	return nil
