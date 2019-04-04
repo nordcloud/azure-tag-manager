@@ -17,18 +17,17 @@ func (c *CheckCommand) Execute(cfg Config) error {
 		return errors.Wrap(err, "could not create session")
 	}
 
+	fmt.Println("checking group", cfg.ResourceGroup)
+	scanner := azure.NewResourceGroupScanner(sess)
+	res, err := scanner.GetResourcesByResourceGroup(cfg.ResourceGroup)
+	if err != nil {
+		return errors.Wrap(err, "could not get resources by group")
+	}
+
 	checker := azure.NewAzureChecker(sess)
 	if cfg.DryRun {
 		checker.DryRun()
 		fmt.Println("    Running in a dry run")
-	}
-
-	scanner := azure.NewResourceGroupScanner(sess)
-
-	fmt.Println("checking group", cfg.ResourceGroup)
-	res, err := scanner.GetResourcesByResourceGroup(cfg.ResourceGroup)
-	if err != nil {
-		return errors.Wrap(err, "could not get resources by group")
 	}
 
 	nonc := checker.CheckResourceGroup(res)
