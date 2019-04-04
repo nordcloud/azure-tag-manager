@@ -58,6 +58,7 @@ func main() {
 		},
 	}
 
-	err := pool.Execute(cfg, command)
-	log.Fatal(errors.Wrap(err, "could not execute command"))
+	if err := pool.Execute(cfg, command); err != nil {
+		log.Fatal(errors.Wrap(err, "could not execute command"))
+	}
 }
