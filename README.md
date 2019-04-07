@@ -26,7 +26,6 @@ export AZURE_AUTH_LOCATION=my.auth
 
 ## How it works ?
 
-g
 ```json
 {
   "dryrun": true,
@@ -45,6 +44,34 @@ g
       }
     ]
 }
+```
+
+Equivalent of the same file in YAML would look like:
+
+```YAML
+---
+dryrun: true
+rules:
+- name: Tag me this
+  conditions:
+  - type: tagEqual
+    tag: darek
+    value: dupa
+  - type: tagExists
+    tag: darek7
+  - type: tagNotExists
+    tag: env
+  - type: regionEqual
+    region: westeurope
+  - type: rgEqual
+    resourceGroup: darek
+  actions:
+  - type: addTag
+    tag: mucha
+    value: zoo
+  - type: addTag
+    tag: mucha3
+    value: zoo
 ```
 
 As of today, the tag rewriter accepts four kinds of conditions (all are case senstive):
@@ -68,7 +95,7 @@ When rewriting, the tool will first do a backup of old tags. It will be saved in
 
 * `-c` - choose mode of operation: `rew` is for tag rewriting, `restore` is to restore backup, `check` is for doing sanity checks (not yet implemented)
 * `--dry` - will run in a dry mode - no changes will be made 
-* `-m FILE` - path to the file with rules, used only in rew mode
+* `-m FILE` - path to the file with rules, used only in rew mode (json or yaml)
 * `--verbose` - show more logs
 * `-f, --restoreFile FILE` - Specify the location of the restore file (works only with command restore)
 
@@ -90,6 +117,7 @@ INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/669
 
 * support for backup of the old tags
 * support for restoring tags
+* support for rules to be encoded in YAML
 
 
 0.2
