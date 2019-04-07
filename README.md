@@ -60,6 +60,8 @@ As of today, the tag rewriter accepts four kinds of conditions (all are case sen
 * `rgEqual` - match resource group in a key `resourceGroup`
 * `rgNotEqual` - match not resource group 
 
+When rewriting, the tool will first do a backup of old tags. It will be saved in a file in the current (run) directory. 
+
 
 ## Running 
 
