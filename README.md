@@ -67,10 +67,11 @@ When rewriting, the tool will first do a backup of old tags. It will be saved in
 
 `./tagmanager -c rew -m mapping.json --dry --verbose`
 
-* `-c` - choose mode of operation: `rew` is for tag rewriting, `check` is for doing sanity checks (not yet implemented)
+* `-c` - choose mode of operation: `rew` is for tag rewriting, `restore` is to restore backup, `check` is for doing sanity checks (not yet implemented)
 * `--dry` - will run in a dry mode - no changes will be made 
 * `-m FILE` - path to the file with rules, used only in rew mode
 * `--verbose` - show more logs
+* `-f, --restoreFile FILE` - Specify the location of the restore file (works only with command restore)
 
 
 ### Example run

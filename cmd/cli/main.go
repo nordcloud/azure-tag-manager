@@ -14,11 +14,13 @@ const (
 	usageDryRun        = "The tagger will not execute any actions"
 	usageCommand       = "A mode of operation - choose (rew or check)"
 	usageResourceGroup = "Specifies resource group"
+	usageRestoreFile   = "Specify the location of the restore file"
 )
 
 const (
 	commandRewrite = "rew"
 	commandCheck   = "check"
+	commandRestore = "restore"
 )
 
 var (
@@ -27,6 +29,7 @@ var (
 	verboseEnabled bool
 	command        string
 	resourceGroup  string
+	restoreFile    string
 )
 
 func init() {
@@ -35,6 +38,8 @@ func init() {
 	flag.BoolVar(&dryRunEnabled, "dry", false, usageDryRun)
 	flag.StringVarP(&command, "command", "c", commandCheck, usageCommand)
 	flag.StringVarP(&resourceGroup, "resourceGroup", "r", "", usageResourceGroup)
+	flag.StringVarP(&restoreFile, "restoreFile", "f", "", usageRestoreFile)
+
 	flag.Parse()
 
 	if verboseEnabled {
@@ -49,12 +54,14 @@ func main() {
 		MappingFile:   mappingFile,
 		DryRun:        dryRunEnabled,
 		ResourceGroup: resourceGroup,
+		RestoreFile:   restoreFile,
 	}
 
 	pool := commands.Pool{
 		Commands: map[string]commands.Command{
 			commandCheck:   &commands.CheckCommand{},
 			commandRewrite: &commands.RewriteCommand{},
+			commandRestore: &commands.RestoreCommand{},
 		},
 	}
 
