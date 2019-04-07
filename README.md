@@ -26,8 +26,7 @@ export AZURE_AUTH_LOCATION=my.auth
 
 ## How it works ?
 
-Tag rewriter accepts the payload where rules are defined. Each rule has a list of conditions and a lits of actions. If all conditions evaluate to true for a resource, all actions are executed. 
-
+g
 ```json
 {
   "dryrun": true,
@@ -86,6 +85,12 @@ INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/669
 ```
 
 ## Changelog
+
+0.3.5
+
+* support for backup of the old tags
+* support for restoring tags
+
 
 0.2
 
