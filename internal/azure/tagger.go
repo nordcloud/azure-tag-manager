@@ -141,16 +141,16 @@ func (t *Tagger) InitCondMap() {
 
 func (t Tagger) ExecuteActions() error {
 	for resID, found := range t.Found {
-		log.Printf("🚀  Executing actions rule '%s' on %s\n", found.TagRule.Name, resID)
+		log.Printf("Executing actions of rule [%s] on [%s]\n", found.TagRule.Name, resID)
 		for _, action := range found.Actions {
 			if t.dryRun == true {
-				log.Printf("  🏜 (dryRun) [%s] Action %s (%s=%s)\n", found.TagRule.Name, action.GetType(), action["tag"], action["value"])
+				log.Printf("(dryRun) [%s] Action [%s] (%s=%s)\n", found.TagRule.Name, action.GetType(), action["tag"], action["value"])
 			} else {
-				log.Printf("  🚀  [%s] Action %s (%s=%s)\n", found.TagRule.Name, action.GetType(), action["tag"], action["value"])
+				log.Printf("!!! [%s] Action [%s] (%s=%s)\n", found.TagRule.Name, action.GetType(), action["tag"], action["value"])
 				resource := Resource{ID: resID}
 				err := t.Execute(&resource, action)
 				if err != nil {
-					log.Errorf("Can't fire rule %s on %s\n", action.GetType(), resource.ID)
+					log.Errorf("Can't execute action [%s] on [%s]\n", action.GetType(), resource.ID)
 				}
 			}
 		}
