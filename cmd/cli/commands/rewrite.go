@@ -60,7 +60,6 @@ func (r *RewriteCommand) Execute(cfg Config) error {
 	} else {
 		fmt.Println("No resources matched your conditions 😫")
 	}
-
 	return nil
 }
 
