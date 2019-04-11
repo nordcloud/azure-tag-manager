@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"bitbucket.org/nordcloud/tagmanager/cmd/cli/commands"
 	"github.com/pkg/errors"
 
@@ -63,6 +65,11 @@ func main() {
 			commandRewrite: &commands.RewriteCommand{},
 			commandRestore: &commands.RestoreCommand{},
 		},
+	}
+
+	if len(os.Args) < 2 {
+		flag.PrintDefaults()
+		os.Exit(1)
 	}
 
 	if err := pool.Execute(cfg, command); err != nil {
