@@ -1,14 +1,20 @@
 package azure
 
 import (
-	"fmt"
-
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/rules"
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
+//ActionExecution stores information about execution of actions of a rule
+type ActionExecution struct {
+	ResourceID string
+	RuleName   string
+	Actions    []rules.ActionItem
+}
+
+//NewTagger creates tagger
 func NewTagger(ruleDef rules.TagRules, session *session.AzureSession) *Tagger {
 	tagger := Tagger{
 		Session: session,
@@ -141,14 +147,17 @@ func (t *Tagger) InitCondMap() {
 	}
 }
 
-func (t Tagger) ExecuteActions() error {
+func (t Tagger) ExecuteActions() (error, []ActionExecution) {
+	ael := make([]ActionExecution, len(t.Found))
 	for resID, found := range t.Found {
-		fmt.Printf("Executing actions of rule [%s] on [%s]\n", found.TagRule.Name, resID)
+		ae := ActionExecution{
+			ResourceID: resID,
+			RuleName:   found.TagRule.Name,
+			Actions:    found.Actions,
+		}
 		for _, action := range found.Actions {
 			if t.dryRun == true {
-				fmt.Printf("(dryRun) [%s] Action [%s] (%s=%s)\n", found.TagRule.Name, action.GetType(), action["tag"], action["value"])
 			} else {
-				fmt.Printf("!!! [%s] Action [%s] (%s=%s)\n", found.TagRule.Name, action.GetType(), action["tag"], action["value"])
 				resource := Resource{ID: resID}
 				err := t.Execute(&resource, action)
 				if err != nil {
@@ -156,9 +165,10 @@ func (t Tagger) ExecuteActions() error {
 				}
 			}
 		}
+		ael = append(ael, ae)
 	}
 
-	return nil
+	return nil, ael
 }
 
 // EvaluateRules iterates over all rules and resources and checks which conditions are true.

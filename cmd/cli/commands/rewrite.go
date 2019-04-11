@@ -9,6 +9,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+type ActionExecution struct {
+}
+
 type RewriteCommand struct{}
 
 func (r *RewriteCommand) Execute(cfg Config) error {
@@ -25,8 +28,8 @@ func (r *RewriteCommand) Execute(cfg Config) error {
 	tagger := azure.NewTagger(t, sess)
 	if cfg.DryRun {
 		tagger.DryRun()
-		fmt.Println("!!!! Running in a dry run mode !!!!\n")
-		fmt.Println("!!!! No actions will be executed !!!!\n")
+		fmt.Println("!! Running in a dry run mode")
+		fmt.Println("!! No actions will be executed")
 	}
 
 	if err != nil {
@@ -44,7 +47,7 @@ func (r *RewriteCommand) Execute(cfg Config) error {
 		return errors.Wrap(err, "can't eval rules")
 	}
 
-	fmt.Println("Evaluating conditions\n")
+	fmt.Println("Evaluating conditions")
 	for _, i := range tagger.Found {
 		r := i.Resource
 		fmt.Printf("Conditions of rule [%s] matched [%s] in [%s] with ID %s\n", i.TagRule.Name, *r.Name, *r.ResourceGroup, r.ID)
@@ -54,9 +57,21 @@ func (r *RewriteCommand) Execute(cfg Config) error {
 		fmt.Println("\nExecuting actions on matched resources")
 		backupFile := azure.NewBackupFromFound(tagger.Found, "")
 		fmt.Printf("Backup will be saved in: %s\n", backupFile)
-		if err := tagger.ExecuteActions(); err != nil {
+
+		err, ael := tagger.ExecuteActions()
+
+		if err != nil {
 			return errors.Wrap(err, "can't exec actions")
 		}
+
+		for _, ae := range ael {
+			fmt.Println("Action executions")
+			fmt.Printf("Rule [%s] on [%s]\n", ae.RuleName, ae.ResourceID)
+			for _, action := range ae.Actions {
+				fmt.Printf("Action: [%s] [%s = %s]\n", action.GetType(), action["tag"], action["value"])
+			}
+		}
+
 	} else {
 		fmt.Println("No resources matched your conditions 😫")
 	}
