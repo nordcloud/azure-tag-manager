@@ -2,6 +2,8 @@ package azure
 
 import (
 	"context"
+	"log"
+	"sync"
 
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
@@ -40,29 +42,49 @@ func NewResourceGroupScanner(s *session.AzureSession) *ResourceGroupScanner {
 	return scanner
 }
 
+func (r ResourceGroupScanner) scanResourceGroup(rg string) []Resource {
+	tab := make([]Resource, 0)
+
+	for list, err := r.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.NextWithContext(context.Background()) {
+		if err != nil {
+			log.Fatal(err)
+		}
+		resource := list.Value()
+		tab = append(tab, Resource{
+			Platform:      "azure",
+			ID:            *resource.ID,
+			Name:          resource.Name,
+			Region:        *resource.Location,
+			Tags:          resource.Tags,
+			ResourceGroup: String(rg),
+		})
+	}
+	return tab
+}
+
 func (r ResourceGroupScanner) GetResources() ([]Resource, error) {
+	var wg sync.WaitGroup
+
 	groups, err := r.GetGroups()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not obtain groups")
 	}
 
 	tab := make([]Resource, 0)
+	out := make(chan []Resource)
 	for _, rg := range groups {
-		for list, err := r.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.NextWithContext(context.Background()) {
-			if err != nil {
-				return nil, errors.Wrap(err, "got error while traversing resources list")
-			}
-
-			resource := list.Value()
-			tab = append(tab, Resource{
-				Platform:      "azure",
-				ID:            *resource.ID,
-				Name:          resource.Name,
-				Region:        *resource.Location,
-				Tags:          resource.Tags,
-				ResourceGroup: String(rg),
-			})
-		}
+		wg.Add(1)
+		go func(rg string) {
+			defer wg.Done()
+			out <- r.scanResourceGroup(rg)
+		}(rg)
+	}
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+	for s := range out {
+		tab = append(tab, s...)
 	}
 
 	return tab, nil

@@ -19,7 +19,7 @@ func NewTagger(ruleDef rules.TagRules, session *session.AzureSession) *Tagger {
 	tagger := Tagger{
 		Session: session,
 		Rules:   ruleDef,
-		Found:   make(map[string]Found),
+		Matched: make(map[string]Matched),
 	}
 
 	tagger.InitActionMap()
@@ -28,8 +28,8 @@ func NewTagger(ruleDef rules.TagRules, session *session.AzureSession) *Tagger {
 	return &tagger
 }
 
-// Found stores
-type Found struct {
+// Matched stores
+type Matched struct {
 	Actions  []rules.ActionItem
 	Resource Resource
 	TagRule  rules.Rule
@@ -37,7 +37,7 @@ type Found struct {
 
 type Tagger struct {
 	Session   *session.AzureSession
-	Found     map[string]Found
+	Matched   map[string]Matched
 	Rules     rules.TagRules
 	condMap   condFuncMap
 	actionMap actionFuncMap
@@ -148,14 +148,14 @@ func (t *Tagger) InitCondMap() {
 }
 
 func (t Tagger) ExecuteActions() (error, []ActionExecution) {
-	ael := make([]ActionExecution, len(t.Found))
-	for resID, found := range t.Found {
+	ael := make([]ActionExecution, len(t.Matched))
+	for resID, matched := range t.Matched {
 		ae := ActionExecution{
 			ResourceID: resID,
-			RuleName:   found.TagRule.Name,
-			Actions:    found.Actions,
+			RuleName:   matched.TagRule.Name,
+			Actions:    matched.Actions,
 		}
-		for _, action := range found.Actions {
+		for _, action := range matched.Actions {
 			if t.dryRun == true {
 			} else {
 				resource := Resource{ID: resID}
@@ -186,8 +186,8 @@ func (t Tagger) EvaluateRules(resources []Resource) error {
 			}
 
 			if evaled {
-				found := Found{Actions: y.Actions, Resource: resource, TagRule: y}
-				t.Found[resource.ID] = found
+				matched := Matched{Actions: y.Actions, Resource: resource, TagRule: y}
+				t.Matched[resource.ID] = matched
 			}
 		}
 	}
