@@ -8,7 +8,7 @@ import (
 
 type TagChecker struct {
 	Session *session.AzureSession
-	Found   map[string]Found
+	Matched map[string]Matched
 	dryRun  bool
 }
 

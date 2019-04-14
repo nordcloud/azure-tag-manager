@@ -48,14 +48,14 @@ func (r *RewriteCommand) Execute(cfg Config) error {
 	}
 
 	fmt.Println("Evaluating conditions")
-	for _, i := range tagger.Found {
+	for _, i := range tagger.Matched {
 		r := i.Resource
 		fmt.Printf("Conditions of rule [%s] matched [%s] in [%s] with ID %s\n", i.TagRule.Name, *r.Name, *r.ResourceGroup, r.ID)
 	}
 
-	if len(tagger.Found) > 0 {
+	if len(tagger.Matched) > 0 {
 		fmt.Println("\nExecuting actions on matched resources")
-		backupFile := azure.NewBackupFromFound(tagger.Found, "")
+		backupFile := azure.NewBackupFromMatched(tagger.Matched, "")
 		fmt.Printf("Backup will be saved in: %s\n", backupFile)
 
 		err, ael := tagger.ExecuteActions()
