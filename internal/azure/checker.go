@@ -9,12 +9,8 @@ import (
 type TagChecker struct {
 	Session *session.AzureSession
 	Matched map[string]Matched
-	dryRun  bool
 }
 
-func (t *TagChecker) DryRun() {
-	t.dryRun = true
-}
 func (t TagChecker) CheckResourceGroup(resources []Resource) map[string][]Resource {
 	var (
 		nonCompliant = make(map[string][]Resource)
@@ -28,7 +24,6 @@ func (t TagChecker) CheckResourceGroup(resources []Resource) map[string][]Resour
 				if tagSeen[key] != *value {
 					fmt.Printf("Non compliance !! seen tag (%s=%s) != (%s=%s)\n", key, tagSeen[key], key, *value)
 					nonCompliant[key] = append(nonCompliant[key], resource)
-					// fmt.Printf("Non compliant resources %v", resource)
 				}
 			} else {
 				tagSeen[key] = *value

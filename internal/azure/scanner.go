@@ -2,8 +2,9 @@ package azure
 
 import (
 	"context"
-	"log"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"

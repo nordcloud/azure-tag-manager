@@ -91,25 +91,31 @@ When rewriting, the tool will first do a backup of old tags. It will be saved in
 
 ## Running 
 
-`./tagmanager -c rew -m mapping.json --dry --verbose`
+Tagmanager accept commands and flags: `tagmanager COMMAND [FLAGS`]. 
+```
+Usage:
+  tagmanager [command]
 
-* `-c` - choose mode of operation: `rew` is for tag rewriting, `restore` is to restore backup, `check` is for doing sanity checks (not yet implemented)
-* `--dry` - will run in a dry mode - no changes will be made 
-* `-m FILE` - path to the file with rules, used only in rew mode (json or yaml)
-* `--verbose` - show more logs
-* `-f, --restoreFile FILE` - Specify the location of the restore file (works only with command restore)
+Available Commands:
+  check       Do sanity checks on a resource group (NOT IMPLEMENTED YET)
+  help        Help about any command
+  restore     Restore previous tags from a file backup
+  rewrite     Rewrite tags based on rules from a file
 
-
-### Example run
-
+Flags:
+  -h, --help      help for tagmanager
+  -v, --verbose   verbose output
 ```
 
-➜  pantageusz git:(master) ✗  ./tagmanager -c rew -m mapping.json --dry --verbose
-INFO[0002] 👍  Conditions are true for (darek33) with ID = /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
-INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
-INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/6690b014-bdbd-4496-98ee-f2f255699f70/resourceGroups/darek/providers/Microsoft.Storage/storageAccounts/darek33 
+Commands:
 
-```
+* `rewrite` - mode where tagmanager will retag the resources based on mapping given in a mapping file input (specified with `-m filepath` flag). If `--dry` flag is given, the tagging actions will not be executed
+
+* `restore` - restores tags backed up in a file, supplied by `-f filepath` flag
+
+* `check` - (EXPERIMENTAL) does some basic sanity checks on the resource group given as `--rg` flag 
+
+
 
 ## Changelog
 
@@ -117,6 +123,7 @@ INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/669
 
 * better CLI output 
 * faster scanning 
+* changes in the command line now commands are given directly not as flags
 
 0.3.5
 
