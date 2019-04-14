@@ -25,7 +25,7 @@ pipelines:
           caches:
             - dep
           script: # Modify the commands below to build your repository.
-            - APP_VERSION="${BITBUCKET_BRANCH:8:10}-${BITBUCKET_COMMIT:0:7}"
+            - APP_VERSION="${BITBUCKET_BRANCH:8:10}"
             - PACKAGE_PATH="${GOPATH}/src/bitbucket.org/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}"          
             - mkdir -pv "${PACKAGE_PATH}"
             - tar -cO --exclude-vcs --exclude=bitbucket-pipelines.yml . | tar -xv -C "${PACKAGE_PATH}"
@@ -43,7 +43,7 @@ pipelines:
           deployment: production
           script:
             - echo "Generating CLI"
-            - APP_VERSION="${BITBUCKET_BRANCH:8:10}-${BITBUCKET_COMMIT:0:7}"
+            - APP_VERSION="${BITBUCKET_BRANCH:8:10}"
             - ls ${BITBUCKET_CLONE_DIR}/build/
             - curl -X POST --user "${BB_AUTH_STRING}" "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.osx"
             - curl -X POST --user "${BB_AUTH_STRING}" "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.linux"
