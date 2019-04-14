@@ -4,35 +4,43 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 
 	"bitbucket.org/nordcloud/tagmanager/internal/azure"
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
 )
 
-type RestoreCommand struct{}
+const (
+	usageRestoreFile = "Specify the location of the restore file"
+)
 
-func (c *RestoreCommand) Execute(cfg Config) error {
+var (
+	restoreFile string
+)
 
-	sess, err := session.NewFromFile()
-	if err != nil {
-		return errors.Wrap(err, "could not create session")
-	}
-
-	fmt.Printf("Restoring tags from: [%s]\n", cfg.RestoreFile)
-
-	restorer := azure.NewRestorerFromFile(cfg.RestoreFile, sess, false)
-	err = restorer.Restore()
-
-	if err != nil {
-		return errors.Wrap(err, "could not restore backup")
-	}
-	return nil
+func init() {
+	rootCmd.AddCommand(restoreCommand)
+	restoreCommand.Flags().StringVarP(&restoreFile, "file", "f", "", usageRestoreFile)
+	restoreCommand.MarkFlagRequired("file")
 }
 
-func (c *RestoreCommand) Validate(cfg Config) error {
-	if cfg.RestoreFile == "" {
-		return errors.New("Restorefile needs to be specified (-f)")
-	}
+var restoreCommand = &cobra.Command{
+	Use:   "restore",
+	Short: "Restore previous tags from a file backup",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		sess, err := session.NewFromFile()
+		if err != nil {
+			return errors.Wrap(err, "could not create session")
+		}
 
-	return nil
+		fmt.Printf("Restoring tags from: [%s]\n", restoreFile)
+
+		restorer := azure.NewRestorerFromFile(restoreFile, sess, false)
+		err = restorer.Restore()
+
+		if err != nil {
+			return errors.Wrap(err, "could not restore backup")
+		}
+		return nil
+	},
 }
