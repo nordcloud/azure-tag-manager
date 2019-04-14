@@ -17,13 +17,14 @@ type BackupEntry struct {
 	Tags map[string]*string `json:"tags"`
 }
 
-func NewBackupFromFound(found map[string]Found, directory string) string {
+//NewBackupFromMatched make a file backup from the matching resources
+func NewBackupFromMatched(matched map[string]Matched, directory string) string {
 	var backup []BackupEntry
 
-	for ID, found := range found {
+	for ID, matched := range matched {
 		entry := &BackupEntry{
 			ID:   ID,
-			Tags: found.Resource.Tags,
+			Tags: matched.Resource.Tags,
 		}
 		backup = append(backup, *entry)
 	}

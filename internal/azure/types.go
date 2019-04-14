@@ -1,5 +1,6 @@
 package azure
 
+//Resource represents a generic resource with name, region, id, tags and resource group
 type Resource struct {
 	Platform      string
 	Name          *string
