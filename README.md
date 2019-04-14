@@ -113,6 +113,11 @@ INFO[0002]      🔥  DryRun Firing action addTag on resource /subscriptions/669
 
 ## Changelog
 
+0.4
+
+* better CLI output 
+* faster scanning 
+
 0.3.5
 
 * support for backup of the old tags
