@@ -70,7 +70,8 @@ var rewriteCommand = &cobra.Command{
 		fmt.Println("Evaluating conditions")
 		for _, i := range tagger.Matched {
 			r := i.Resource
-			fmt.Printf("Conditions of rule [%s] matched [%s] in [%s] with ID %s\n", i.TagRule.Name, *r.Name, *r.ResourceGroup, r.ID)
+			fmt.Printf("Conditions of [%d] rule(s) matched for [%s] in [%s] with ID %s\n", len(i.TagRules), *r.Name, *r.ResourceGroup, r.ID)
+
 		}
 
 		if len(tagger.Matched) > 0 {
@@ -83,9 +84,8 @@ var rewriteCommand = &cobra.Command{
 			if err != nil {
 				return errors.Wrap(err, "can't exec actions")
 			}
-
+			fmt.Println("Executing actions")
 			for _, ae := range ael {
-				fmt.Println("Action executions")
 				fmt.Printf("Rule [%s] on [%s]\n", ae.RuleName, ae.ResourceID)
 				for _, action := range ae.Actions {
 					fmt.Printf("Action: [%s] [%s = %s]\n", action.GetType(), action["tag"], action["value"])

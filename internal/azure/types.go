@@ -6,6 +6,8 @@ type Resource struct {
 	Name          *string
 	Region        string
 	ID            string
+	Kind          *string
+	Type          *string
 	Tags          map[string]*string
 	ResourceGroup *string
 }
