@@ -1,40 +1,50 @@
 package azure
 
 import (
-	"fmt"
-
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
 )
 
 type TagChecker struct {
 	Session *session.AzureSession
-	Matched map[string]Matched
 }
 
-func (t TagChecker) CheckResourceGroup(resources []Resource) map[string][]Resource {
+type SameTagDifferentValue struct {
+	Resource Resource
+	Value    string
+}
+
+func (t TagChecker) CheckSameTagDifferentValue(resources []Resource) map[string][]SameTagDifferentValue {
+
 	var (
-		nonCompliant = make(map[string][]Resource)
-		tagSeen      = make(map[string]string)
+		nonCompliant     = make(map[string][]SameTagDifferentValue)
+		tagSeen          = make(map[string]SameTagDifferentValue)
+		originalAppended = false
 	)
 
 	for _, resource := range resources {
 		for key, value := range resource.Tags {
+			originalAppended = false
+			//if exists
 			if _, ok := tagSeen[key]; ok {
-				fmt.Println(key)
-				if tagSeen[key] != *value {
-					fmt.Printf("Non compliance !! seen tag (%s=%s) != (%s=%s)\n", key, tagSeen[key], key, *value)
-					nonCompliant[key] = append(nonCompliant[key], resource)
+				// if already recorded with different value
+				if tagSeen[key].Value != *value {
+					s := &SameTagDifferentValue{Resource: resource, Value: *value}
+					nonCompliant[key] = append(nonCompliant[key], *s)
+					if originalAppended == false {
+						nonCompliant[key] = append(nonCompliant[key], tagSeen[key])
+						originalAppended = true
+					}
 				}
 			} else {
-				tagSeen[key] = *value
+				tagSeen[key] = SameTagDifferentValue{Resource: resource, Value: *value}
 			}
 		}
 	}
-
 	return nonCompliant
 }
 
-func NewAzureChecker(s *session.AzureSession) *TagChecker {
+//NewTagChecker
+func NewTagChecker(s *session.AzureSession) *TagChecker {
 	checker := TagChecker{
 		Session: s,
 	}

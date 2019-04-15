@@ -45,7 +45,6 @@ func NewResourceGroupScanner(s *session.AzureSession) *ResourceGroupScanner {
 
 func (r ResourceGroupScanner) scanResourceGroup(rg string) []Resource {
 	tab := make([]Resource, 0)
-
 	for list, err := r.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.NextWithContext(context.Background()) {
 		if err != nil {
 			log.Fatal(err)
@@ -113,6 +112,7 @@ func (r ResourceGroupScanner) GetResourcesByResourceGroup(rg string) ([]Resource
 		}
 
 		resource := list.Value()
+
 		tab = append(tab, Resource{
 			Platform: "azure",
 			ID:       *resource.ID,

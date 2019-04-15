@@ -30,9 +30,8 @@ func NewTagger(ruleDef rules.TagRules, session *session.AzureSession) *Tagger {
 
 // Matched stores
 type Matched struct {
-	Actions  []rules.ActionItem
 	Resource Resource
-	TagRule  rules.Rule
+	TagRules []rules.Rule
 }
 
 type Tagger struct {
@@ -148,26 +147,28 @@ func (t *Tagger) InitCondMap() {
 }
 
 func (t Tagger) ExecuteActions() (error, []ActionExecution) {
-	ael := make([]ActionExecution, len(t.Matched))
+	ael := make([]ActionExecution, len(t.Matched)-1)
 	for resID, matched := range t.Matched {
-		ae := ActionExecution{
-			ResourceID: resID,
-			RuleName:   matched.TagRule.Name,
-			Actions:    matched.Actions,
-		}
-		for _, action := range matched.Actions {
-			if t.dryRun == true {
-			} else {
-				resource := Resource{ID: resID}
-				err := t.Execute(&resource, action)
-				if err != nil {
-					log.Errorf("Can't execute action [%s] on [%s]\n", action.GetType(), resource.ID)
+
+		for _, rule := range matched.TagRules {
+			ae := ActionExecution{
+				ResourceID: resID,
+				RuleName:   rule.Name,
+				Actions:    rule.Actions,
+			}
+			for _, action := range rule.Actions {
+				if t.dryRun == true {
+				} else {
+					resource := Resource{ID: resID}
+					err := t.Execute(&resource, action)
+					if err != nil {
+						log.Errorf("Can't execute action [%s] on [%s]\n", action.GetType(), resource.ID)
+					}
 				}
 			}
+			ael = append(ael, ae)
 		}
-		ael = append(ael, ae)
 	}
-
 	return nil, ael
 }
 
@@ -186,8 +187,13 @@ func (t Tagger) EvaluateRules(resources []Resource) error {
 			}
 
 			if evaled {
-				matched := Matched{Actions: y.Actions, Resource: resource, TagRule: y}
-				t.Matched[resource.ID] = matched
+				if val, ok := t.Matched[resource.ID]; ok {
+					matched := Matched{Resource: resource, TagRules: append(val.TagRules, y)}
+					t.Matched[resource.ID] = matched
+				} else {
+					matched := Matched{Resource: resource, TagRules: []rules.Rule{y}}
+					t.Matched[resource.ID] = matched
+				}
 			}
 		}
 	}

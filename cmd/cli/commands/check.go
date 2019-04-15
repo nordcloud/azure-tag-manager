@@ -28,26 +28,26 @@ func init() {
 
 var checkCommand = &cobra.Command{
 	Use:   "check",
-	Short: "Do sanity checks on a resource group (NOT IMPLEMENTED YET)",
+	Short: "Do sanity checks on a resource group (NOT FULLY IMPLEMENTED YET)",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		sess, err := session.NewFromFile()
 		if err != nil {
 			return errors.Wrap(err, "could not create session")
 		}
 
-		fmt.Println("checking group", resourceGroup)
 		scanner := azure.NewResourceGroupScanner(sess)
 		res, err := scanner.GetResourcesByResourceGroup(resourceGroup)
 		if err != nil {
 			return errors.Wrap(err, "could not get resources by group")
 		}
 
-		checker := azure.NewAzureChecker(sess)
-		nonc := checker.CheckResourceGroup(res)
+		checker := azure.NewTagChecker(sess)
+		fmt.Printf("Checking same tag with different values in [%s]\n", resourceGroup)
+		nonc := checker.CheckSameTagDifferentValue(res)
 		for tag, nonrList := range nonc {
-			fmt.Printf("Tag with different values: %s\n", tag)
+			fmt.Printf("Noncompliant tag [%s]\n", tag)
 			for _, nonr := range nonrList {
-				fmt.Println(nonr)
+				fmt.Printf("Seen [%s] = [%s] in [%s]\n", tag, nonr.Value, nonr.Resource.ID)
 			}
 		}
 
