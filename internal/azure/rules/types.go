@@ -53,6 +53,8 @@ func (p ActionItem) GetType() string {
 	return ""
 }
 
+var jsonPrefix = []byte("{")
+
 func parseRulesDefinitions(rules string) (TagRules, error) {
 	var rulesDef TagRules
 	byt := []byte(rules)
@@ -68,8 +70,6 @@ func parseRulesDefinitions(rules string) (TagRules, error) {
 	return rulesDef, nil
 }
 
-var jsonPrefix = []byte("{")
-
 // hasJSONPrefix returns true if the provided buffer appears to start with
 // a JSON open brace.
 func hasJSONPrefix(buf []byte) bool {
@@ -80,11 +80,4 @@ func hasJSONPrefix(buf []byte) bool {
 func hasPrefix(buf []byte, prefix []byte) bool {
 	trim := bytes.TrimLeftFunc(buf, unicode.IsSpace)
 	return bytes.HasPrefix(trim, prefix)
-}
-
-func ToJSON(data []byte) ([]byte, error) {
-	if hasJSONPrefix(data) {
-		return data, nil
-	}
-	return yaml.YAMLToJSON(data)
 }
