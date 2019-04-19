@@ -21,7 +21,6 @@ func NewTagger(ruleDef rules.TagRules, session *session.AzureSession) *Tagger {
 		Rules:   ruleDef,
 		Matched: make(map[string]Matched),
 	}
-
 	tagger.InitActionMap()
 	tagger.InitCondMap()
 
@@ -57,6 +56,7 @@ func (t *Tagger) InitActionMap() {
 
 		return nil
 	}
+
 }
 
 func (t *Tagger) InitCondMap() {
@@ -147,7 +147,7 @@ func (t *Tagger) InitCondMap() {
 }
 
 func (t Tagger) ExecuteActions() (error, []ActionExecution) {
-	ael := make([]ActionExecution, len(t.Matched)-1)
+	ael := make([]ActionExecution, 0)
 	for resID, matched := range t.Matched {
 
 		for _, rule := range matched.TagRules {
