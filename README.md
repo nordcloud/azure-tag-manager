@@ -74,7 +74,7 @@ rules:
     value: zoo
 ```
 
-As of today, the tag rewriter accepts four kinds of conditions (all are case senstive):
+Tag rewriter accepts four kinds of conditions (all are case senstive):
 
 * `noTags` - checks if there are no tags set 
 * `tagEqual` - checks if a `tag` has a `value` set 
@@ -84,22 +84,29 @@ As of today, the tag rewriter accepts four kinds of conditions (all are case sen
 * `regionEqual` - checks if resource is in key `region` (aka location in azure)
 * `regionNotEqual` - same as above but negative
 * `rgEqual` - match resource group in a key `resourceGroup`
-* `rgNotEqual` - match not resource group 
+* `rgNotEqual` - match not resource group
+* `resEqual` - resource name equals `resource` 
+
+The supported actions are:
+
+* `addTag` - adds a tag with key `tag` and value `value`
+* `delTag` - deletes a tag with key `tag`
 
 When rewriting, the tool will first do a backup of old tags. It will be saved in a file in the current (run) directory. 
 
 
 ## Running 
 
-Tagmanager accept commands and flags: `tagmanager COMMAND [FLAGS`]. 
+Tagmanager accepts commands and flags: `tagmanager COMMAND [FLAGS`]. 
 ```
 Usage:
   tagmanager [command]
 
 Available Commands:
-  check       Do sanity checks on a resource group (NOT IMPLEMENTED YET)
+  check       Do sanity checks on a resource group (NOT FULLY IMPLEMENTED YET)
   help        Help about any command
   restore     Restore previous tags from a file backup
+  retagrg     Retag resources in a rg based on tags on rgs
   rewrite     Rewrite tags based on rules from a file
 
 Flags:
@@ -115,9 +122,16 @@ Commands:
 
 * `check` - (EXPERIMENTAL) does some basic sanity checks on the resource group given as `--rg` flag 
 
+* `retagrg` - Takes tags form a given resource group (`--rg`) and applies them to all of the resources in the resource group. If any existing tags are already there, the new ones with be appended. Adding `--cleantags` will clean ALL the tags on resources before adding new ones. 
+
 
 
 ## Changelog
+
+0.4.7
+
+* added retagrg 
+* added delTag action
 
 0.4
 

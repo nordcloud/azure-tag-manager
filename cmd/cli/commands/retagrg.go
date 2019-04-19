@@ -10,9 +10,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var cleanTags bool
+
 func init() {
 	rootCmd.AddCommand(resourceGroupTagCommand)
 	resourceGroupTagCommand.Flags().StringVarP(&resourceGroup, "rg", "r", "", usageResourceGroup)
+	resourceGroupTagCommand.Flags().BoolVar(&cleanTags, "cleantags", false, "Clean all tags before adding")
 	resourceGroupTagCommand.MarkFlagRequired("rg")
 	resourceGroupTagCommand.Flags().BoolVar(&dryRunEnabled, "dry", false, usageDryRun)
 
@@ -21,6 +24,7 @@ func init() {
 var resourceGroupTagCommand = &cobra.Command{
 	Use:   "retagrg",
 	Short: "Retag resources in a rg based on tags on rgs",
+	Long:  "Takes tags form a given resource group and applies them to all of the resources in the resource group. If any existing tags are already there, the new ones with be appended.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		sess, err := session.NewFromFile()
@@ -39,13 +43,13 @@ var resourceGroupTagCommand = &cobra.Command{
 
 		var actions []rules.ActionItem
 
+		if cleanTags {
+			actions = append(actions, rules.ActionItem{"type": "cleanTags"})
+		}
+
 		for key, tag := range rgTags {
 			actions = append(actions, rules.ActionItem{"type": "addTag", "tag": key, "value": *tag})
 		}
-
-		// for _, res := range resources {
-		// 	fmt.Println(res.Tags)
-		// }
 
 		rules := rules.TagRules{Rules: []rules.Rule{
 			rules.Rule{Name: "name", Conditions: []rules.ConditionItem{

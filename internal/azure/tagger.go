@@ -51,9 +51,25 @@ func (t *Tagger) InitActionMap() {
 	t.actionMap["addTag"] = func(p map[string]string, data *Resource) error {
 		err := t.createOrUpdateTag(data.ID, p["tag"], p["value"])
 		if err != nil {
-			return errors.Wrapf(err, "Action addTag did not succeed for resource %s", data.ID)
+			return errors.Wrapf(err, "Action addTag failed for resource %s", data.ID)
 		}
 
+		return nil
+	}
+
+	t.actionMap["delTag"] = func(p map[string]string, data *Resource) error {
+		err := t.deleteTag(data.ID, p["tag"])
+		if err != nil {
+			return errors.Wrapf(err, "Action delTag failed for resource %s", data.ID)
+		}
+		return nil
+	}
+
+	t.actionMap["cleanTags"] = func(p map[string]string, data *Resource) error {
+		err := t.deleteAllTags(data.ID)
+		if err != nil {
+			return errors.Wrapf(err, "Action cleanTags failed for resource %s", data.ID)
+		}
 		return nil
 	}
 
@@ -144,6 +160,13 @@ func (t *Tagger) InitCondMap() {
 		}
 		return false
 	}
+
+	t.condMap["resEqual"] = func(p map[string]string, data *Resource) bool {
+		if p["resourceGroup"] != *data.ResourceGroup {
+			return true
+		}
+		return false
+	}
 }
 
 func (t Tagger) ExecuteActions() (error, []ActionExecution) {
@@ -162,7 +185,7 @@ func (t Tagger) ExecuteActions() (error, []ActionExecution) {
 					resource := Resource{ID: resID}
 					err := t.Execute(&resource, action)
 					if err != nil {
-						log.Errorf("Can't execute action [%s] on [%s]\n", action.GetType(), resource.ID)
+						log.Errorf("Can't execute action [%s] on [%s]\n", action.GetType(), resource.ID, err)
 					}
 				}
 			}
