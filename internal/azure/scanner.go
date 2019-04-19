@@ -21,10 +21,21 @@ type Scanner interface {
 	GetResources() ([]Resource, error)
 	GetResourcesByResourceGroup(string) ([]Resource, error)
 	GetGroups() ([]string, error)
+	GetResourceGroupTags(string) (map[string]*string, error)
 }
 
 func String(v string) *string {
 	return &v
+}
+
+func (r ResourceGroupScanner) GetResourceGroupTags(rg string) (map[string]*string, error) {
+	result, err := r.GroupsClient.Get(context.Background(), rg)
+
+	if err != nil {
+		return nil, errors.Wrapf(err, "Can't get resource group %s", rg)
+	}
+
+	return result.Tags, nil
 }
 
 func NewResourceGroupScanner(s *session.AzureSession) *ResourceGroupScanner {
@@ -43,7 +54,7 @@ func NewResourceGroupScanner(s *session.AzureSession) *ResourceGroupScanner {
 	return scanner
 }
 
-func (r ResourceGroupScanner) scanResourceGroup(rg string) []Resource {
+func (r ResourceGroupScanner) ScanResourceGroup(rg string) []Resource {
 	tab := make([]Resource, 0)
 	for list, err := r.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.NextWithContext(context.Background()) {
 		if err != nil {
@@ -76,7 +87,7 @@ func (r ResourceGroupScanner) GetResources() ([]Resource, error) {
 		wg.Add(1)
 		go func(rg string) {
 			defer wg.Done()
-			out <- r.scanResourceGroup(rg)
+			out <- r.ScanResourceGroup(rg)
 		}(rg)
 	}
 	go func() {

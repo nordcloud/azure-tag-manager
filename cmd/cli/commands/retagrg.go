@@ -10,58 +10,59 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type ActionExecution struct {
-}
-
-const (
-	usageMappingFile = "Location of the tag rules definition (json)"
-	usageDryRun      = "The tagger will not execute any actions"
-)
-
-var (
-	mappingFile   string
-	dryRunEnabled bool
-)
-
 func init() {
-	rootCmd.AddCommand(rewriteCommand)
-	rewriteCommand.Flags().StringVarP(&mappingFile, "map", "m", "", usageMappingFile)
-	rewriteCommand.MarkFlagRequired("map")
-	rewriteCommand.Flags().BoolVar(&dryRunEnabled, "dry", false, usageDryRun)
+	rootCmd.AddCommand(resourceGroupTagCommand)
+	resourceGroupTagCommand.Flags().StringVarP(&resourceGroup, "rg", "r", "", usageResourceGroup)
+	resourceGroupTagCommand.MarkFlagRequired("rg")
+	resourceGroupTagCommand.Flags().BoolVar(&dryRunEnabled, "dry", false, usageDryRun)
+
 }
 
-var rewriteCommand = &cobra.Command{
-	Use:   "rewrite",
-	Short: "Rewrite tags based on rules from a file",
+var resourceGroupTagCommand = &cobra.Command{
+	Use:   "retagrg",
+	Short: "Retag resources in a rg based on tags on rgs",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		t, err := rules.NewFromFile(mappingFile)
-		if err != nil {
-			return errors.Wrapf(err, "Can't parse rules from %s", mappingFile)
-		}
 
 		sess, err := session.NewFromFile()
 		if err != nil {
 			return errors.Wrap(err, "Could not create session")
 		}
+		scanner := azure.NewResourceGroupScanner(sess)
 
-		tagger := azure.NewTagger(t, sess)
+		rgTags, err := scanner.GetResourceGroupTags(resourceGroup)
+
+		if err != nil {
+			return errors.Wrap(err, "Can't get tags")
+		}
+
+		resources := scanner.ScanResourceGroup(resourceGroup)
+
+		var actions []rules.ActionItem
+
+		for key, tag := range rgTags {
+			actions = append(actions, rules.ActionItem{"type": "addTag", "tag": key, "value": *tag})
+		}
+
+		// for _, res := range resources {
+		// 	fmt.Println(res.Tags)
+		// }
+
+		rules := rules.TagRules{Rules: []rules.Rule{
+			rules.Rule{Name: "name", Conditions: []rules.ConditionItem{
+				rules.ConditionItem{"type": "rgEqual", "resourceGroup": resourceGroup},
+			},
+				Actions: actions,
+			},
+		}}
+
+		tagger := azure.NewTagger(rules, sess)
 		if dryRunEnabled {
 			tagger.DryRun()
 			fmt.Println("!! Running in a dry run mode")
 			fmt.Println("!! No actions will be executed")
 		}
 
-		if err != nil {
-			return errors.Wrap(err, "Can't create tagger")
-		}
-
-		scanner := azure.NewResourceGroupScanner(tagger.Session)
-		res, err := scanner.GetResources()
-		if err != nil {
-			return errors.Wrap(err, "can't scan resources")
-		}
-
-		err = tagger.EvaluateRules(res)
+		err = tagger.EvaluateRules(resources)
 		if err != nil {
 			return errors.Wrap(err, "can't eval rules")
 		}
@@ -93,6 +94,7 @@ var rewriteCommand = &cobra.Command{
 		} else {
 			fmt.Println("No resources matched your conditions 😫")
 		}
+
 		return nil
 	},
 }
