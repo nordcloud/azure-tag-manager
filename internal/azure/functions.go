@@ -10,10 +10,8 @@ import (
 )
 
 func (t Tagger) deleteAllTags(id string) error {
-	client := resources.NewClient(t.Session.SubscriptionID)
-	client.Authorizer = t.Session.Authorizer
 
-	_, err := client.GetByID(context.Background(), id)
+	_, err := t.ResourcesClient.GetByID(context.Background(), id)
 	if err != nil {
 		return errors.Wrap(err, "cannot get resource by id")
 	}
@@ -22,7 +20,7 @@ func (t Tagger) deleteAllTags(id string) error {
 		Tags: make(map[string]*string),
 	}
 
-	_, err = client.UpdateByID(context.Background(), id, genericResource)
+	_, err = t.ResourcesClient.UpdateByID(context.Background(), id, genericResource)
 	if err != nil {
 		return errors.Wrap(err, "cannot update resource by id")
 	}
@@ -31,10 +29,8 @@ func (t Tagger) deleteAllTags(id string) error {
 }
 
 func (t Tagger) deleteTag(id, tag string) error {
-	client := resources.NewClient(t.Session.SubscriptionID)
-	client.Authorizer = t.Session.Authorizer
 
-	r, err := client.GetByID(context.Background(), id)
+	r, err := t.ResourcesClient.GetByID(context.Background(), id)
 	if err != nil {
 		return errors.Wrap(err, "cannot get resource by id")
 	}
@@ -48,7 +44,7 @@ func (t Tagger) deleteTag(id, tag string) error {
 		Tags: r.Tags,
 	}
 
-	_, err = client.UpdateByID(context.Background(), id, genericResource)
+	_, err = t.ResourcesClient.UpdateByID(context.Background(), id, genericResource)
 	if err != nil {
 		return errors.Wrap(err, "cannot update resource by id")
 	}
@@ -57,10 +53,8 @@ func (t Tagger) deleteTag(id, tag string) error {
 }
 
 func (t Tagger) createOrUpdateTag(id, tag, value string) error {
-	client := resources.NewClient(t.Session.SubscriptionID)
-	client.Authorizer = t.Session.Authorizer
 
-	r, err := client.GetByID(context.Background(), id)
+	r, err := t.ResourcesClient.GetByID(context.Background(), id)
 	if err != nil {
 		return errors.Wrap(err, "cannot get resource by id")
 	}
@@ -78,7 +72,7 @@ func (t Tagger) createOrUpdateTag(id, tag, value string) error {
 		Tags: r.Tags,
 	}
 
-	_, err = client.UpdateByID(context.Background(), id, genericResource)
+	_, err = t.ResourcesClient.UpdateByID(context.Background(), id, genericResource)
 	if err != nil {
 		return errors.Wrap(err, "cannot update resource by id")
 	}

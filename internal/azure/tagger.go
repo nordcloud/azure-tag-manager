@@ -3,6 +3,7 @@ package azure
 import (
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/rules"
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -16,11 +17,16 @@ type ActionExecution struct {
 
 //NewTagger creates tagger
 func NewTagger(ruleDef rules.TagRules, session *session.AzureSession) *Tagger {
+	grClient := resources.NewClient(session.SubscriptionID)
+	grClient.Authorizer = session.Authorizer
+
 	tagger := Tagger{
-		Session: session,
-		Rules:   ruleDef,
-		Matched: make(map[string]Matched),
+		Session:         session,
+		Rules:           ruleDef,
+		Matched:         make(map[string]Matched),
+		ResourcesClient: &grClient,
 	}
+
 	tagger.InitActionMap()
 	tagger.InitCondMap()
 
@@ -34,12 +40,13 @@ type Matched struct {
 }
 
 type Tagger struct {
-	Session   *session.AzureSession
-	Matched   map[string]Matched
-	Rules     rules.TagRules
-	condMap   condFuncMap
-	actionMap actionFuncMap
-	dryRun    bool
+	Session         *session.AzureSession
+	Matched         map[string]Matched
+	Rules           rules.TagRules
+	condMap         condFuncMap
+	actionMap       actionFuncMap
+	dryRun          bool
+	ResourcesClient *resources.Client
 }
 
 func (t *Tagger) DryRun() {
