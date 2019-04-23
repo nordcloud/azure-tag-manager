@@ -1,12 +1,32 @@
 package azure
 
 import (
+	"context"
+	"fmt"
+
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/rules"
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources/resourcesapi"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
+
+type Tagger struct {
+	Session         *session.AzureSession
+	Matched         map[string]Matched
+	Rules           rules.TagRules
+	condMap         condFuncMap
+	actionMap       actionFuncMap
+	dryRun          bool
+	ResourcesClient resourcesapi.ClientAPI
+}
+
+// Matched stores
+type Matched struct {
+	Resource Resource
+	TagRules []rules.Rule
+}
 
 //ActionExecution stores information about execution of actions of a rule
 type ActionExecution struct {
@@ -31,22 +51,6 @@ func NewTagger(ruleDef rules.TagRules, session *session.AzureSession) *Tagger {
 	tagger.InitCondMap()
 
 	return &tagger
-}
-
-// Matched stores
-type Matched struct {
-	Resource Resource
-	TagRules []rules.Rule
-}
-
-type Tagger struct {
-	Session         *session.AzureSession
-	Matched         map[string]Matched
-	Rules           rules.TagRules
-	condMap         condFuncMap
-	actionMap       actionFuncMap
-	dryRun          bool
-	ResourcesClient *resources.Client
 }
 
 func (t *Tagger) DryRun() {
@@ -176,10 +180,9 @@ func (t *Tagger) InitCondMap() {
 	}
 }
 
-func (t Tagger) ExecuteActions() (error, []ActionExecution) {
+func (t *Tagger) ExecuteActions() ([]ActionExecution, error) {
 	ael := make([]ActionExecution, 0)
 	for resID, matched := range t.Matched {
-
 		for _, rule := range matched.TagRules {
 			ae := ActionExecution{
 				ResourceID: resID,
@@ -187,27 +190,27 @@ func (t Tagger) ExecuteActions() (error, []ActionExecution) {
 				Actions:    rule.Actions,
 			}
 			for _, action := range rule.Actions {
-				if t.dryRun == true {
-				} else {
+				if t.dryRun != true {
 					resource := Resource{ID: resID}
 					err := t.Execute(&resource, action)
 					if err != nil {
-						log.Errorf("Can't execute action [%s] on [%s]\n", action.GetType(), resource.ID, err)
+						msg := fmt.Sprintf("ExecuteActions(): Can't execute action [%s] on [%s], [%s]\n", action.GetType(), resource.ID, err)
+						return []ActionExecution{}, errors.New(msg)
 					}
 				}
 			}
 			ael = append(ael, ae)
 		}
 	}
-	return nil, ael
+	return ael, nil
 }
 
 // EvaluateRules iterates over all rules and resources and checks which conditions are true.
-func (t Tagger) EvaluateRules(resources []Resource) error {
+func (t Tagger) EvaluateRules(resources []Resource) {
 	var evaled bool
+
 	for _, resource := range resources {
 		evaled = true
-		log.Debugf("🔍  Checking resource: %s (%s) \n", *resource.Name, resource.ID)
 		for _, y := range t.Rules.Rules {
 			for _, cond := range y.Conditions {
 				evaled = t.Eval(&resource, cond)
@@ -227,6 +230,90 @@ func (t Tagger) EvaluateRules(resources []Resource) error {
 			}
 		}
 	}
+}
 
+func (t Tagger) deleteAllTags(id string) error {
+	genericResource := resources.GenericResource{
+		Tags: make(map[string]*string),
+	}
+
+	_, err := t.ResourcesClient.UpdateByID(context.Background(), id, genericResource)
+	if err != nil {
+		return errors.Wrap(err, "cannot update resource by id")
+	}
+
+	return err
+}
+
+func (t Tagger) deleteTag(id, tag string) error {
+
+	r, err := t.ResourcesClient.GetByID(context.Background(), id)
+	if err != nil {
+		return errors.Wrap(err, "cannot get resource by id")
+	}
+
+	if _, ok := r.Tags[tag]; !ok {
+		return nil
+	}
+
+	delete(r.Tags, tag)
+	genericResource := resources.GenericResource{
+		Tags: r.Tags,
+	}
+
+	_, err = t.ResourcesClient.UpdateByID(context.Background(), id, genericResource)
+	if err != nil {
+		return errors.Wrap(err, "cannot update resource by id")
+	}
+
+	return err
+}
+
+func (t Tagger) createOrUpdateTag(id, tag, value string) error {
+
+	r, err := t.ResourcesClient.GetByID(context.Background(), id)
+	if err != nil {
+		return errors.Wrap(err, "cannot get resource by id")
+	}
+
+	if _, ok := r.Tags[tag]; ok {
+		return nil
+	}
+
+	if r.Tags == nil {
+		r.Tags = make(map[string]*string)
+	}
+
+	r.Tags[tag] = &value
+	genericResource := resources.GenericResource{
+		Tags: r.Tags,
+	}
+
+	_, err = t.ResourcesClient.UpdateByID(context.Background(), id, genericResource)
+	if err != nil {
+		return errors.Wrap(err, "cannot update resource by id")
+	}
+
+	return err
+}
+
+func (t *Tagger) Execute(data *Resource, p rules.ActionItem) error {
+	if val, ok := t.actionMap[p.GetType()]; ok {
+		err := val(p, data)
+		if err != nil {
+			msg := fmt.Sprintf("Execute(action=%q) returned error %q", p.GetType(), err)
+			return errors.New(msg)
+		}
+		return nil
+	}
+	log.Warnf("Unknown action type %s - ignoring", p.GetType())
 	return nil
+}
+
+func (t *Tagger) Eval(data *Resource, p rules.ConditionItem) bool {
+	if val, ok := t.condMap[p.GetType()]; ok {
+		return val(p, data)
+	}
+	log.Warnf("Unknown condition type %s - ignoring", p.GetType())
+	return false
 }

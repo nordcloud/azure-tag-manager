@@ -10,12 +10,24 @@ import (
 
 	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources/resourcesapi"
 	"github.com/pkg/errors"
 )
 
 type BackupEntry struct {
 	ID   string             `json:"id"`
 	Tags map[string]*string `json:"tags"`
+}
+
+type Restorer interface {
+	Restore() error
+}
+
+type TagRestorer struct {
+	Session         *session.AzureSession
+	ResourcesClient resourcesapi.ClientAPI
+	ReplaceTags     bool
+	Backup          []BackupEntry
 }
 
 //NewBackupFromMatched make a file backup from the matching resources
@@ -43,17 +55,6 @@ func NewBackupFromMatched(matched map[string]Matched, directory string) string {
 	}
 
 	return tmpfile.Name()
-}
-
-type Restorer interface {
-	Restore() error
-}
-
-type TagRestorer struct {
-	Session         *session.AzureSession
-	ResourcesClient *resources.Client
-	ReplaceTags     bool
-	Backup          []BackupEntry
 }
 
 func (t TagRestorer) Restore() error {
