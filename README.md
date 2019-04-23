@@ -125,7 +125,6 @@ Commands:
 * `retagrg` - Takes tags form a given resource group (`--rg`) and applies them to all of the resources in the resource group. If any existing tags are already there, the new ones with be appended. Adding `--cleantags` will clean ALL the tags on resources before adding new ones. 
 
 
-
 ## Changelog
 
 0.4.7
@@ -164,4 +163,3 @@ Commands:
 Dariusz Dwornikowski, 
 
 Nordcloud PAT team (Hold my 🍺, not hold my 🐴🐴)
-

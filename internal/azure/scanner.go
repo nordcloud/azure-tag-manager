@@ -123,7 +123,6 @@ func (r ResourceGroupScanner) GetResourcesByResourceGroup(rg string) ([]Resource
 		}
 
 		resource := list.Value()
-
 		tab = append(tab, Resource{
 			Platform: "azure",
 			ID:       *resource.ID,
@@ -132,6 +131,5 @@ func (r ResourceGroupScanner) GetResourcesByResourceGroup(rg string) ([]Resource
 			Tags:     resource.Tags,
 		})
 	}
-
 	return tab, nil
 }
