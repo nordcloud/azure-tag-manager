@@ -194,7 +194,7 @@ func (t *Tagger) ExecuteActions() ([]ActionExecution, error) {
 					resource := Resource{ID: resID}
 					err := t.Execute(&resource, action)
 					if err != nil {
-						msg := fmt.Sprintf("ExecuteActions(): Can't execute action [%s] on [%s], [%s]\n", action.GetType(), resource.ID, err)
+						msg := fmt.Sprintf("ExecuteActions(): Execute() failed Can't execute action [%s] on [%s], [%s]\n", action.GetType(), resource.ID, err)
 						return []ActionExecution{}, errors.New(msg)
 					}
 				}
@@ -239,17 +239,16 @@ func (t Tagger) deleteAllTags(id string) error {
 
 	_, err := t.ResourcesClient.UpdateByID(context.Background(), id, genericResource)
 	if err != nil {
-		return errors.Wrap(err, "cannot update resource by id")
+		return errors.Wrapf(err, "deleteAllTags(id=%s): UpdateByID() failed", id)
 	}
-
-	return err
+	return nil
 }
 
 func (t Tagger) deleteTag(id, tag string) error {
 
 	r, err := t.ResourcesClient.GetByID(context.Background(), id)
 	if err != nil {
-		return errors.Wrap(err, "cannot get resource by id")
+		return errors.Wrapf(err, "deleteTag(id=%s, tag=%s): GetByID failed", id, tag)
 	}
 
 	if _, ok := r.Tags[tag]; !ok {
@@ -263,9 +262,8 @@ func (t Tagger) deleteTag(id, tag string) error {
 
 	_, err = t.ResourcesClient.UpdateByID(context.Background(), id, genericResource)
 	if err != nil {
-		return errors.Wrap(err, "cannot update resource by id")
+		return errors.Wrapf(err, "deleteTag(id=%s, tag=%s): UpdateByID() failed", id, tag)
 	}
-
 	return err
 }
 

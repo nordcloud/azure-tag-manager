@@ -14,6 +14,7 @@ pipelines:
           - go get -u github.com/golang/dep/cmd/dep
           - dep ensure -v 
           - mkdir "${BITBUCKET_CLONE_DIR}/build"
+          - go test ./...
           - GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}.osx cmd/cli/main.go
           - GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}.linux cmd/cli/main.go
           - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}.exe cmd/cli/main.go
@@ -33,6 +34,7 @@ pipelines:
             - go get -u github.com/golang/dep/cmd/dep
             - dep ensure -v
             - mkdir "${BITBUCKET_CLONE_DIR}/build"
+            - go test ./...
             - GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.osx cmd/cli/main.go
             - GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.linux cmd/cli/main.go
             - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o ${BITBUCKET_CLONE_DIR}/build/${BITBUCKET_REPO_SLUG}-${APP_VERSION}.exe cmd/cli/main.go

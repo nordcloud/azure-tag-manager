@@ -30,11 +30,9 @@ func String(v string) *string {
 
 func (r ResourceGroupScanner) GetResourceGroupTags(rg string) (map[string]*string, error) {
 	result, err := r.GroupsClient.Get(context.Background(), rg)
-
 	if err != nil {
-		return nil, errors.Wrapf(err, "Can't get resource group %s", rg)
+		return nil, errors.Wrapf(err, "GetResourceGroupTags(rg=%s): Get() failed", rg)
 	}
-
 	return result.Tags, nil
 }
 
@@ -78,7 +76,7 @@ func (r ResourceGroupScanner) GetResources() ([]Resource, error) {
 
 	groups, err := r.GetGroups()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not obtain groups")
+		return nil, errors.Wrap(err, "GetResources(): GetGroups() failed")
 	}
 
 	tab := make([]Resource, 0)
@@ -105,13 +103,11 @@ func (r ResourceGroupScanner) GetGroups() ([]string, error) {
 	tab := make([]string, 0)
 	for list, err := r.GroupsClient.ListComplete(context.Background(), "", nil); list.NotDone(); err = list.NextWithContext(context.Background()) {
 		if err != nil {
-			return nil, errors.Wrap(err, "got error while traverising RG list")
+			return nil, errors.Wrap(err, "GetGroups(): GroupsClient.ListComplete failed")
 		}
-
 		rgName := *list.Value().Name
 		tab = append(tab, rgName)
 	}
-
 	return tab, nil
 }
 
@@ -119,9 +115,8 @@ func (r ResourceGroupScanner) GetResourcesByResourceGroup(rg string) ([]Resource
 	tab := make([]Resource, 0)
 	for list, err := r.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.NextWithContext(context.Background()) {
 		if err != nil {
-			return nil, errors.Wrap(err, "got error while traversing resources list")
+			return nil, errors.Wrapf(err, "GetResourcesByResourceGroup(rg=%q): ListByResourceGroupComplete() failed", rg)
 		}
-
 		resource := list.Value()
 		tab = append(tab, Resource{
 			Platform: "azure",

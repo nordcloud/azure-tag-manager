@@ -52,4 +52,4 @@ var checkCommand = &cobra.Command{
 		}
 
 		return nil
-}
+	}}
