@@ -43,7 +43,7 @@ func (t TagChecker) CheckSameTagDifferentValue(resources []Resource) map[string]
 	return nonCompliant
 }
 
-//NewTagChecker
+//NewTagChecker 
 func NewTagChecker(s *session.AzureSession) *TagChecker {
 	checker := TagChecker{
 		Session: s,

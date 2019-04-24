@@ -66,10 +66,7 @@ var resourceGroupTagCommand = &cobra.Command{
 			fmt.Println("!! No actions will be executed")
 		}
 
-		err = tagger.EvaluateRules(resources)
-		if err != nil {
-			return errors.Wrap(err, "can't eval rules")
-		}
+		tagger.EvaluateRules(resources)
 
 		fmt.Println("Evaluating conditions")
 		for _, i := range tagger.Matched {
@@ -82,10 +79,10 @@ var resourceGroupTagCommand = &cobra.Command{
 			backupFile := azure.NewBackupFromMatched(tagger.Matched, "")
 			fmt.Printf("Backup will be saved in: %s\n", backupFile)
 
-			err, ael := tagger.ExecuteActions()
+			ael, err := tagger.ExecuteActions()
 
 			if err != nil {
-				return errors.Wrap(err, "can't exec actions")
+				return errors.Wrap(err, "can't execute actions")
 			}
 			fmt.Println("Executing actions")
 			for _, ae := range ael {

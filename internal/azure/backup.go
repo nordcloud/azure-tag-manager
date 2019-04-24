@@ -3,7 +3,6 @@ package azure
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 
 	log "github.com/sirupsen/logrus"
@@ -59,7 +58,7 @@ func NewBackupFromMatched(matched map[string]Matched, directory string) string {
 
 func (t TagRestorer) Restore() error {
 	for _, backupEntry := range t.Backup {
-		fmt.Printf("Restoring tags for [%s]\n", backupEntry.ID)
+		log.Infof("Restoring tags for [%s]\n", backupEntry.ID)
 		_, err := t.ResourcesClient.GetByID(context.Background(), backupEntry.ID)
 
 		if err != nil {

@@ -61,10 +61,7 @@ var rewriteCommand = &cobra.Command{
 			return errors.Wrap(err, "can't scan resources")
 		}
 
-		err = tagger.EvaluateRules(res)
-		if err != nil {
-			return errors.Wrap(err, "can't eval rules")
-		}
+		tagger.EvaluateRules(res)
 
 		fmt.Println("Evaluating conditions")
 		for _, i := range tagger.Matched {
@@ -77,7 +74,7 @@ var rewriteCommand = &cobra.Command{
 			backupFile := azure.NewBackupFromMatched(tagger.Matched, "")
 			fmt.Printf("Backup will be saved in: %s\n", backupFile)
 
-			err, ael := tagger.ExecuteActions()
+			ael, err := tagger.ExecuteActions()
 
 			if err != nil {
 				return errors.Wrap(err, "can't exec actions")
