@@ -122,35 +122,6 @@ Commands:
 
 * `retagrg` - Takes tags form a given resource group (`--rg`) and applies them to all of the resources in the resource group. If any existing tags are already there, the new ones with be appended. Adding `--cleantags` will clean ALL the tags on resources before adding new ones. 
 
-
-## Changelog
-
-0.4.7
-
-* added retagrg 
-* added delTag action
-
-0.4
-
-* better CLI output 
-* faster scanning 
-* changes in the command line now commands are given directly not as flags
-
-0.3.5
-
-* support for backup of the old tags
-* support for restoring tags
-* support for rules to be encoded in YAML
-
-
-0.2
-
-* support for named rules (you must use `name` to add a name for a rule)
-* support for a new condition check `rgEqual` and `rgNotEqual` to match resource groups   the syntax is ` { "type": "rgEqual", "resourceGroup": "myRg" }`
-* support for checking for no tags `noTags` 
-* a less verbose debug level
-
-
 ## Todo 
 
 * Azure ARM policy setting 
