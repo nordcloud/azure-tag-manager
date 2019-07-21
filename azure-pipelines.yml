@@ -40,5 +40,11 @@ steps:
     ls -l $(Build.ArtifactStagingDirectory)/
   displayName: 'Build'
 
+- task: GitHubRelease@0
+  displayName: ‘Create GitHub Release’
+  inputs:
+    githubConnection: nordcloud
+    repositoryName: nordcloud/azure-tag-manager
+
 
   
