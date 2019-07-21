@@ -51,7 +51,4 @@ steps:
     repositoryName: nordcloud/azure-tag-manager
     title: v$(Build.BuildNumber)
 
-    
-
-
   
