@@ -1,6 +1,6 @@
 package main
 
-import "bitbucket.org/nordcloud/tagmanager/cmd/cli/commands"
+import "github.com/nordcloud/azure-tag-manager/cmd/cli/commands"
 
 func main() {
 	commands.Execute()

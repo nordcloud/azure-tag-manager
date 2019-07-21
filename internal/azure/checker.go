@@ -1,7 +1,7 @@
 package azure
 
 import (
-	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
+	"github.com/nordcloud/azure-tag-manager/internal/azure/session"
 )
 
 type TagChecker struct {

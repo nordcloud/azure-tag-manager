@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"bitbucket.org/nordcloud/tagmanager/internal/azure/rules"
-	"bitbucket.org/nordcloud/tagmanager/mocks"
+	"github.com/nordcloud/azure-tag-manager/internal/azure/rules"
+	"github.com/nordcloud/azure-tag-manager/mocks"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	"github.com/stretchr/testify/assert"
 )
