@@ -4,7 +4,9 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/go
 
 trigger:
-- opensource
+- master
+- release/*
+
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -13,34 +15,44 @@ variables:
   GOBIN:  '$(GOPATH)/bin' # Go binaries path
   GOROOT: '/usr/local/go1.11' # Go installation path
   GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
-  modulePath: '$(GOPATH)/src/github.com/$(build.repository.name)' # Path to the module's code
 
 steps:
 - script: |
     mkdir -p '$(GOBIN)'
     mkdir -p '$(GOPATH)/pkg'
-    mkdir -p '$(modulePath)'
     shopt -s extglob
     shopt -s dotglob
-    mv !(gopath) '$(modulePath)'
     echo '##vso[task.prependpath]$(GOBIN)'
     echo '##vso[task.prependpath]$(GOROOT)/bin'
   displayName: 'Set up the Go workspace'
 
-- script: |
-    go get -u github.com/golang/dep/cmd/dep
-    # curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-    dep ensure -v
-    # fi
-  workingDirectory: '$(modulePath)'
-  displayName: 'Get dependencies'
-
-- script: go build -v .
-  workingDirectory: '$(modulePath)'
-  displayName: 'Build'
 
 - script: go test -v ./...
-  workingDirectory: '$(modulePath)'
-  displayName: 'Run tests'
+  displayName: 'Run tests and get deps'
+
+- script: |
+    set -e -x
+    APP_VERSION=$(git describe --tags | tr - ' ' | awk '// {print $2}' || echo $(Build.BuildId)) 
+    echo ${APP_VERSION}
+    export GOARCH=amd64
+    export GOOS=darwin 
+    go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
+    export GOOS=linux 
+    go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
+    export GOOS=windows 
+    go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
+    ls -la $(Build.ArtifactStagingDirectory)
+  displayName: 'Build'
+
+- task: GitHubRelease@0
+  displayName: ‘Create GitHub Release’
+  inputs:
+    action: 'create'
+    githubConnection: tdi
+    repositoryName: nordcloud/azure-tag-manager
+    tagSource: 'auto'
+    addChangeLog: true
+
+
 
   
