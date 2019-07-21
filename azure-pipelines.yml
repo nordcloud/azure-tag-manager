@@ -32,9 +32,13 @@ steps:
     set -e -x
     APP_VERSION=$(git describe --tags | tr - ' ' | awk '// {print $2}' || echo $(Build.BuildId)) 
     echo ${APP_VERSION}
-    GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
-    GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
-    GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
+    export GOARCH=amd64
+    export GOOS=darwin 
+    go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
+    export GOOS=linux 
+    go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
+    export GOOS=windows 
+    go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
     ls -la $(Build.ArtifactStagingDirectory)
   displayName: 'Build'
 
