@@ -33,6 +33,7 @@ steps:
   displayName: 'Run tests'
 
 - script: |
+    set -e -x
     GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(build.repository.name)-${APP_VERSION}.osx cmd/cli/main.go
     GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(build.repository.name)-${APP_VERSION}.linux cmd/cli/main.go
     GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(build.repository.name)-${APP_VERSION}.exe cmd/cli/main.go
