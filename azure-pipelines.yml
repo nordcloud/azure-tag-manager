@@ -47,11 +47,12 @@ steps:
 - task: GitHubRelease@0
   displayName: ‘Create GitHub Release’
   inputs:
+    action: 'create'
     githubConnection: tdi
     repositoryName: nordcloud/azure-tag-manager
-    title: v$(Build.BuildNumber)
+    tagSource: 'auto'
 
 
-    
+
 
   
