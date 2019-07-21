@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"bitbucket.org/nordcloud/tagmanager/internal/azure/rules"
-	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
+	"github.com/nordcloud/azure-tag-manager/internal/azure/rules"
+	"github.com/nordcloud/azure-tag-manager/internal/azure/session"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources/resourcesapi"
 	"github.com/pkg/errors"

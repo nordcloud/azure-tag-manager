@@ -7,8 +7,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"bitbucket.org/nordcloud/tagmanager/internal/azure"
-	"bitbucket.org/nordcloud/tagmanager/internal/azure/session"
+	"github.com/nordcloud/azure-tag-manager/internal/azure"
+	"github.com/nordcloud/azure-tag-manager/internal/azure/session"
 )
 
 const (
