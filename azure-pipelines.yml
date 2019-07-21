@@ -14,41 +14,38 @@ variables:
   GOROOT: '/usr/local/go1.11' # Go installation path
   GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
   APP_VERSION: "0.4.3"
-  # modulePath: '$(GOPATH)/src/github.com/$(build.repository.name)' # Path to the module's code
 
 steps:
 - script: |
     mkdir -p '$(GOBIN)'
     mkdir -p '$(GOPATH)/pkg'
-    mkdir -p '$(modulePath)'
     shopt -s extglob
     shopt -s dotglob
-    # mv !(gopath) '$(modulePath)'
     echo '##vso[task.prependpath]$(GOBIN)'
     echo '##vso[task.prependpath]$(GOROOT)/bin'
   displayName: 'Set up the Go workspace'
 
 
 - script: go test -v ./...
-  # workingDirectory: '$(modulePath)'
-  displayName: 'Run tests'
+  displayName: 'Run tests and get deps'
 
 - script: |
     set -e -x
-    GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/$(build.repository.name)-${APP_VERSION}.osx cmd/cli/main.go
-    GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/$(build.repository.name)-${APP_VERSION}.linux cmd/cli/main.go
-    GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/$(build.repository.name)-${APP_VERSION}.exe cmd/cli/main.go
-    ls -la $(Build.ArtifactStagingDirectory)    
+    GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${APP_VERSION}.osx cmd/cli/main.go
+    GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${APP_VERSION}.linux cmd/cli/main.go
+    GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${APP_VERSION}.exe cmd/cli/main.go
+    ls -la $(Build.ArtifactStagingDirectory)
   displayName: 'Build'
 
 - task: GitHubRelease@0
   displayName: ‘Create GitHub Release’
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/release-')   
   inputs:
     action: 'create'
     githubConnection: tdi
     repositoryName: nordcloud/azure-tag-manager
     tagSource: 'auto'
-    assets: $(Build.ArtifactStagingDirectory)/$(build.repository.name)-${APP_VERSION}.*
+    addChangeLog: true
 
 
 
