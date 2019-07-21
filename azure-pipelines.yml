@@ -27,20 +27,13 @@ steps:
     echo '##vso[task.prependpath]$(GOROOT)/bin'
   displayName: 'Set up the Go workspace'
 
-- script: |
-    go get -u github.com/golang/dep/cmd/dep
-    # curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-    dep ensure -v
-    # fi
+- script: go test -v ./...
   workingDirectory: '$(modulePath)'
-  displayName: 'Get dependencies'
+  displayName: 'Run tests'
 
 - script: go build -v .
   workingDirectory: '$(modulePath)'
   displayName: 'Build'
 
-- script: go test -v ./...
-  workingDirectory: '$(modulePath)'
-  displayName: 'Run tests'
 
   
