@@ -32,13 +32,13 @@ Azure Tag Manager needs a file with rules, each rule consists of conditions and 
     {
         "name": "Tag me stuff", 
         "conditions": [
-            {"type": "tagEqual", "tag": "darek", "value" : "example"},
-            {"type": "tagExists", "tag": "darek7"},
+            {"type": "tagEqual", "tag": "myTag", "value" : "example"},
+            {"type": "tagExists", "tag": "myTagWhichExists"},
             {"type": "tagNotExists", "tag": "env"}
         ], 
         "actions": [
-            {"type": "addTag", "tag": "mucha", "value": "zoo" },
-            {"type": "addTag", "tag": "mucha3", "value": "zoo" }
+            {"type": "addTag", "tag": "newTag", "value": "value" },
+            {"type": "addTag", "tag": "newTag2", "value": "value2" }
         ]
       }
     ]
@@ -54,23 +54,23 @@ rules:
 - name: Tag me this
   conditions:
   - type: tagEqual
-    tag: darek
-    value: dupa
+    tag: myTag
+    value: example
   - type: tagExists
-    tag: darek7
+    tag: myTagWhichExists
   - type: tagNotExists
     tag: env
   - type: regionEqual
     region: westeurope
   - type: rgEqual
-    resourceGroup: darek
+    resourceGroup: exampleRg
   actions:
   - type: addTag
-    tag: mucha
-    value: zoo
+    tag:  newTag
+    value: newValue
   - type: addTag
-    tag: mucha3
-    value: zoo
+    tag: newTag2
+    value: someValue
 ```
 
 The following types of conditions are accepted:
