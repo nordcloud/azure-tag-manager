@@ -1,30 +1,29 @@
-# Tag manager 
+# Azure Tag manager 
 
-Currently the software works for Azure only. 
-
-## Prerequisites
-
-For Azure you need to create service principal.
-
+Tag manager is used to add or change tags on Azure resources on a massive scale. The tags are applied only when given rules are satisfied, for example prior existance of a certain tag, or the lack of it. 
 
 ## Download
 
-You can download a binary for your architecture from https://bitbucket.org/nordcloud/tagmanager/downloads/ 
+You can download a binary for your architecture from the releases page. 
 
-### Azure
-Create service principal file:
+## Usage
+
+To use it you need to create Azure service principal. Create service principal file:
 
 ```bash
 az ad sp create-for-rbac --sdk-auth > my.auth
 ```
-
 and export path to the authorizer:
 
 ```bash
 export AZURE_AUTH_LOCATION=my.auth
 ```
 
+`beta`: Using cli authorizer is in works.
+
 ## How it works ?
+
+Azure Tag Manager needs a file with rules, each rule consists of conditions and actions. Given all the conditions, all actions are executed. The rules file can be supplied either in json or yaml. 
 
 ```json
 {
@@ -74,7 +73,7 @@ rules:
     value: zoo
 ```
 
-Tag rewriter accepts four kinds of conditions (all are case senstive):
+The following types of conditions are accepted:
 
 * `noTags` - checks if there are no tags set 
 * `tagEqual` - checks if a `tag` has a `value` set 
@@ -93,7 +92,6 @@ The supported actions are:
 * `delTag` - deletes a tag with key `tag`
 
 When rewriting, the tool will first do a backup of old tags. It will be saved in a file in the current (run) directory. 
-
 
 ## Running 
 
@@ -160,6 +158,8 @@ Commands:
 
 ## Licence 
 
-Dariusz Dwornikowski, 
+MIT licence.
 
-Nordcloud PAT team (Hold my 🍺, not hold my 🐴🐴)
+Author(s): Dariusz Dwornikowski (@tdi)
+
+Made by Nordcloud in Poznań with ♥. 
