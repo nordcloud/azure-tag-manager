@@ -28,6 +28,7 @@ steps:
     echo '##vso[task.prependpath]$(GOROOT)/bin'
   displayName: 'Set up the Go workspace'
 
+
 - script: go test -v ./...
   # workingDirectory: '$(modulePath)'
   displayName: 'Run tests'
@@ -37,7 +38,10 @@ steps:
     GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/$(build.repository.name)-${APP_VERSION}.osx cmd/cli/main.go
     GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/$(build.repository.name)-${APP_VERSION}.linux cmd/cli/main.go
     GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/$(build.repository.name)-${APP_VERSION}.exe cmd/cli/main.go
-    ls -l $(Build.ArtifactStagingDirectory)/
+    ls $(Build.ArtifactStagingDirectory)
+    echo $(Build.BuildId)
+    echo $(Build.BuildNumber)
+
   displayName: 'Build'
 
 - task: GitHubRelease@0
@@ -45,6 +49,7 @@ steps:
   inputs:
     githubConnection: nordcloud
     repositoryName: nordcloud/azure-tag-manager
+    title: v$(Build.BuildNumber)
 
 
   
