@@ -39,7 +39,6 @@ steps:
 
 - task: GitHubRelease@0
   displayName: ‘Create GitHub Release’
-  condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/release-')   
   inputs:
     action: 'create'
     githubConnection: tdi
