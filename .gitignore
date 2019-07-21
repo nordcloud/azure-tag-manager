@@ -1,3 +1,4 @@
 vendor/
 scripts/
 .idea
+.vscode/
