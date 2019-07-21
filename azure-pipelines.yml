@@ -38,10 +38,7 @@ steps:
     GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/$(build.repository.name)-${APP_VERSION}.osx cmd/cli/main.go
     GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/$(build.repository.name)-${APP_VERSION}.linux cmd/cli/main.go
     GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/$(build.repository.name)-${APP_VERSION}.exe cmd/cli/main.go
-    ls $(Build.ArtifactStagingDirectory)
-    echo $(Build.BuildId)
-    echo $(Build.BuildNumber)
-
+    ls -la $(Build.ArtifactStagingDirectory)    
   displayName: 'Build'
 
 - task: GitHubRelease@0
@@ -51,6 +48,7 @@ steps:
     githubConnection: tdi
     repositoryName: nordcloud/azure-tag-manager
     tagSource: 'auto'
+    assets: $(Build.ArtifactStagingDirectory)/$(build.repository.name)-${APP_VERSION}.*
 
 
 
