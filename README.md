@@ -1,3 +1,6 @@
+
+[![Build Status](https://dev.azure.com/dariuszdwornikowski0297/azure-tag-manager/_apis/build/status/nordcloud.azure-tag-manager?branchName=master)](https://dev.azure.com/dariuszdwornikowski0297/azure-tag-manager/_build/latest?definitionId=1&branchName=master)
+
 # Azure Tag manager 
 
 Tag manager is used to add or change tags on Azure resources on a massive scale. The tags are applied only when given rules are satisfied, for example prior existance of a certain tag, or the lack of it. 
