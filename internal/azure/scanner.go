@@ -6,17 +6,19 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/nordcloud/azure-tag-manager/internal/azure/session"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
+	"github.com/nordcloud/azure-tag-manager/internal/azure/session"
 	"github.com/pkg/errors"
 )
 
+// ResourceGroupScanner represents resource group scanner that scans all resources in a resource group
 type ResourceGroupScanner struct {
 	Session         *session.AzureSession
 	ResourcesClient *resources.Client
 	GroupsClient    *resources.GroupsClient
 }
 
+// Scanner represents generic scanner of Azure resource groups
 type Scanner interface {
 	GetResources() ([]Resource, error)
 	GetResourcesByResourceGroup(string) ([]Resource, error)
@@ -24,10 +26,12 @@ type Scanner interface {
 	GetResourceGroupTags(string) (map[string]*string, error)
 }
 
+// String converts string v to the string pointer
 func String(v string) *string {
 	return &v
 }
 
+// GetResourceGroupTags returns a map of key value tags of a reource group rg
 func (r ResourceGroupScanner) GetResourceGroupTags(rg string) (map[string]*string, error) {
 	result, err := r.GroupsClient.Get(context.Background(), rg)
 	if err != nil {
@@ -36,6 +40,7 @@ func (r ResourceGroupScanner) GetResourceGroupTags(rg string) (map[string]*strin
 	return result.Tags, nil
 }
 
+// NewResourceGroupScanner creates ResourceGroupScanner with Azure Serssion s
 func NewResourceGroupScanner(s *session.AzureSession) *ResourceGroupScanner {
 	resClient := resources.NewClient(s.SubscriptionID)
 	resClient.Authorizer = s.Authorizer
@@ -52,6 +57,7 @@ func NewResourceGroupScanner(s *session.AzureSession) *ResourceGroupScanner {
 	return scanner
 }
 
+// ScanResourceGroup returns a list of resources and their tags from a resource group rg
 func (r ResourceGroupScanner) ScanResourceGroup(rg string) []Resource {
 	tab := make([]Resource, 0)
 	for list, err := r.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.NextWithContext(context.Background()) {
@@ -71,6 +77,7 @@ func (r ResourceGroupScanner) ScanResourceGroup(rg string) []Resource {
 	return tab
 }
 
+// GetResources retruns list of resources in resource group
 func (r ResourceGroupScanner) GetResources() ([]Resource, error) {
 	var wg sync.WaitGroup
 
@@ -99,6 +106,7 @@ func (r ResourceGroupScanner) GetResources() ([]Resource, error) {
 	return tab, nil
 }
 
+// GetGroups returns list of resource groups in a subscription
 func (r ResourceGroupScanner) GetGroups() ([]string, error) {
 	tab := make([]string, 0)
 	for list, err := r.GroupsClient.ListComplete(context.Background(), "", nil); list.NotDone(); err = list.NextWithContext(context.Background()) {
@@ -111,6 +119,7 @@ func (r ResourceGroupScanner) GetGroups() ([]string, error) {
 	return tab, nil
 }
 
+// GetResourcesByResourceGroup returns resources in a resource group rg
 func (r ResourceGroupScanner) GetResourcesByResourceGroup(rg string) ([]Resource, error) {
 	tab := make([]Resource, 0)
 	for list, err := r.ResourcesClient.ListByResourceGroupComplete(context.Background(), rg, "", "", nil); list.NotDone(); err = list.NextWithContext(context.Background()) {

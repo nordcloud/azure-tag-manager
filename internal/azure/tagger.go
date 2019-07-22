@@ -4,25 +4,26 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/nordcloud/azure-tag-manager/internal/azure/rules"
-	"github.com/nordcloud/azure-tag-manager/internal/azure/session"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources/resourcesapi"
+	"github.com/nordcloud/azure-tag-manager/internal/azure/rules"
+	"github.com/nordcloud/azure-tag-manager/internal/azure/session"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
+// Tagger reprents the maing tagging element
 type Tagger struct {
 	Session         *session.AzureSession
 	Matched         map[string]Matched
-	Rules           rules.TagRules
-	condMap         condFuncMap
-	actionMap       actionFuncMap
-	dryRun          bool
+	Rules           rules.TagRules // list of rules
+	condMap         condFuncMap    // map of implementation of conditions
+	actionMap       actionFuncMap  // map of implementation of actions
+	dryRun          bool           // if true, actions will not be executed
 	ResourcesClient resourcesapi.ClientAPI
 }
 
-// Matched stores
+// Matched represents rules that mathc for a resource
 type Matched struct {
 	Resource Resource
 	TagRules []rules.Rule
@@ -53,10 +54,12 @@ func NewTagger(ruleDef rules.TagRules, session *session.AzureSession) *Tagger {
 	return &tagger
 }
 
+// DryRun returns true if the check should be simulated
 func (t *Tagger) DryRun() {
 	t.dryRun = true
 }
 
+// InitActionMap initializes action map with supported actions
 func (t *Tagger) InitActionMap() {
 	t.actionMap = actionFuncMap{}
 	t.actionMap["addTag"] = func(p map[string]string, data *Resource) error {
@@ -86,6 +89,7 @@ func (t *Tagger) InitActionMap() {
 
 }
 
+// InitCondMap initializes conditions map with supported conditions
 func (t *Tagger) InitCondMap() {
 	t.condMap = condFuncMap{}
 	t.condMap["noTags"] = func(p map[string]string, data *Resource) bool {
@@ -180,6 +184,7 @@ func (t *Tagger) InitCondMap() {
 	}
 }
 
+// ExecuteActions executes all actions based on definitions of rules. It resturns list of executed actions
 func (t *Tagger) ExecuteActions() ([]ActionExecution, error) {
 	ael := make([]ActionExecution, 0)
 	for resID, matched := range t.Matched {
@@ -295,6 +300,7 @@ func (t Tagger) createOrUpdateTag(id, tag, value string) error {
 	return err
 }
 
+// Execute executes action from p in resource data
 func (t *Tagger) Execute(data *Resource, p rules.ActionItem) error {
 	if val, ok := t.actionMap[p.GetType()]; ok {
 		err := val(p, data)
@@ -308,6 +314,7 @@ func (t *Tagger) Execute(data *Resource, p rules.ActionItem) error {
 	return nil
 }
 
+// Eval checks if condition p is satisfied on resource data
 func (t *Tagger) Eval(data *Resource, p rules.ConditionItem) bool {
 	if val, ok := t.condMap[p.GetType()]; ok {
 		return val(p, data)

@@ -4,15 +4,19 @@ import (
 	"github.com/nordcloud/azure-tag-manager/internal/azure/session"
 )
 
+// TagChecker represents an Azure checker
 type TagChecker struct {
 	Session *session.AzureSession
 }
 
+// SameTagDifferentValue reprents a resource with a tag's value
 type SameTagDifferentValue struct {
 	Resource Resource
 	Value    string
 }
 
+// CheckSameTagDifferentValue checks if resources in resources are tagged with the same tag but with different values. It returns a map of lists of such resources. The key to the list is tag key.
+//TODO: make this differently
 func (t TagChecker) CheckSameTagDifferentValue(resources []Resource) map[string][]SameTagDifferentValue {
 
 	var (
@@ -43,7 +47,8 @@ func (t TagChecker) CheckSameTagDifferentValue(resources []Resource) map[string]
 	return nonCompliant
 }
 
-//NewTagChecker 
+// NewTagChecker creates new checker with AzureSession
+//TODO: get rid of this
 func NewTagChecker(s *session.AzureSession) *TagChecker {
 	checker := TagChecker{
 		Session: s,

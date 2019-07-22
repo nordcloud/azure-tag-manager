@@ -7,29 +7,31 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/nordcloud/azure-tag-manager/internal/azure/session"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources/resourcesapi"
+	"github.com/nordcloud/azure-tag-manager/internal/azure/session"
 	"github.com/pkg/errors"
 )
 
+// BackupEntry represents one resource tags backup
 type BackupEntry struct {
 	ID   string             `json:"id"`
 	Tags map[string]*string `json:"tags"`
 }
 
+// Restorer provides interface for restorers
 type Restorer interface {
 	Restore() error
 }
 
+// TagRestorer represents a restorer of Azure tags from backup
 type TagRestorer struct {
-	Session         *session.AzureSession
-	ResourcesClient resourcesapi.ClientAPI
-	ReplaceTags     bool
-	Backup          []BackupEntry
+	Session         *session.AzureSession  // session to connect to Azure
+	ResourcesClient resourcesapi.ClientAPI // client to the resources API
+	Backup          []BackupEntry          // list of backup entries
 }
 
-//NewBackupFromMatched make a file backup from the matching resources
+//NewBackupFromMatched makes a file backup from the resources in matched to a json file in directory
 func NewBackupFromMatched(matched map[string]Matched, directory string) string {
 	var backup []BackupEntry
 
@@ -56,6 +58,7 @@ func NewBackupFromMatched(matched map[string]Matched, directory string) string {
 	return tmpfile.Name()
 }
 
+// Restore restores tags from a backup file provided in TagRestorer
 func (t TagRestorer) Restore() error {
 	for _, backupEntry := range t.Backup {
 		log.Infof("Restoring tags for [%s]\n", backupEntry.ID)
@@ -76,7 +79,8 @@ func (t TagRestorer) Restore() error {
 	return nil
 }
 
-func NewRestorerFromFile(filename string, s *session.AzureSession, replace bool) *TagRestorer {
+// NewRestorerFromFile creates a TagRestorer, which will restore tag backup from filename
+func NewRestorerFromFile(filename string, s *session.AzureSession) *TagRestorer {
 	resClient := resources.NewClient(s.SubscriptionID)
 	resClient.Authorizer = s.Authorizer
 
@@ -94,7 +98,6 @@ func NewRestorerFromFile(filename string, s *session.AzureSession, replace bool)
 		Session:         s,
 		ResourcesClient: &resClient,
 		Backup:          backup,
-		ReplaceTags:     replace,
 	}
 	return restorer
 }

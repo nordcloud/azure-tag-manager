@@ -35,7 +35,7 @@ var restoreCommand = &cobra.Command{
 
 		fmt.Printf("Restoring tags from: [%s]\n", restoreFile)
 
-		restorer := azure.NewRestorerFromFile(restoreFile, sess, false)
+		restorer := azure.NewRestorerFromFile(restoreFile, sess)
 		err = restorer.Restore()
 
 		if err != nil {
