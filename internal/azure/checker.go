@@ -26,11 +26,11 @@ func (t TagChecker) CheckSameTagDifferentValue(resources []Resource) map[string]
 	)
 
 	for _, resource := range resources {
+		originalAppended = false
 		for key, value := range resource.Tags {
-			originalAppended = false
-			//if exists
+			//if found
 			if _, ok := tagSeen[key]; ok {
-				// if already recorded with different value
+				// if already recorded but with a different value - this is what we are looking for
 				if tagSeen[key].Value != *value {
 					s := &SameTagDifferentValue{Resource: resource, Value: *value}
 					nonCompliant[key] = append(nonCompliant[key], *s)
@@ -45,14 +45,4 @@ func (t TagChecker) CheckSameTagDifferentValue(resources []Resource) map[string]
 		}
 	}
 	return nonCompliant
-}
-
-// NewTagChecker creates new checker with AzureSession
-//TODO: get rid of this
-func NewTagChecker(s *session.AzureSession) *TagChecker {
-	checker := TagChecker{
-		Session: s,
-	}
-
-	return &checker
 }

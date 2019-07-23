@@ -48,7 +48,7 @@ func NewBackupFromMatched(matched map[string]Matched, directory string) string {
 	}
 	defer tmpfile.Close()
 
-	jsonBackup, err := json.Marshal(backup)
+	jsonBackup, _ := json.Marshal(backup)
 
 	if _, err := tmpfile.Write(jsonBackup); err != nil {
 		tmpfile.Close()

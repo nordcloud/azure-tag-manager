@@ -41,7 +41,9 @@ var checkCommand = &cobra.Command{
 			return errors.Wrap(err, "could not get resources by group")
 		}
 
-		checker := azure.NewTagChecker(sess)
+		checker := azure.TagChecker{
+			Session: sess,
+		}
 		fmt.Printf("Checking same tag with different values in [%s]\n", resourceGroup)
 		nonc := checker.CheckSameTagDifferentValue(res)
 		for tag, nonrList := range nonc {
@@ -49,6 +51,10 @@ var checkCommand = &cobra.Command{
 			for _, nonr := range nonrList {
 				fmt.Printf("Seen [%s] = [%s] in [%s]\n", tag, nonr.Value, nonr.Resource.ID)
 			}
+		}
+
+		if len(nonc) == 0 {
+			fmt.Printf("💪  Resource group [%s] has no tags with different values\n", resourceGroup)
 		}
 
 		return nil

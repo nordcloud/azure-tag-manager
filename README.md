@@ -1,5 +1,5 @@
 
-[![Build Status](https://dev.azure.com/dariuszdwornikowski0297/azure-tag-manager/_apis/build/status/nordcloud.azure-tag-manager?branchName=master)](https://dev.azure.com/dariuszdwornikowski0297/azure-tag-manager/_build/latest?definitionId=1&branchName=master)   
+[![Build Status](https://dev.azure.com/dariuszdwornikowski0297/azure-tag-manager/_apis/build/status/nordcloud.azure-tag-manager?branchName=master)](https://dev.azure.com/dariuszdwornikowski0297/azure-tag-manager/_build/latest?definitionId=1&branchName=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nordcloud/azure-tag-manager)](https://goreportcard.com/report/github.com/nordcloud/azure-tag-manager)
 
 # Azure Tag manager 
