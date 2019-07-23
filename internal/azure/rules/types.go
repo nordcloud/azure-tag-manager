@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// NewFromFile reads filename and returns TagRules
 func NewFromFile(filename string) (TagRules, error) {
 	dat, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -20,23 +21,28 @@ func NewFromFile(filename string) (TagRules, error) {
 	return NewFromString(string(dat))
 }
 
+// NewFromString parses rulesDef and returns TagRules
 func NewFromString(rulesDef string) (TagRules, error) {
 	return parseRulesDefinitions(rulesDef)
 }
 
+// TagRules represents rules parsed from a rules definition
 type TagRules struct {
 	DryRun *bool  `json:"dryrun,omitempty"`
 	Rules  []Rule `json:"rules"`
 }
 
+// Rule represnts single rule
 type Rule struct {
 	Name       string          `json:"name,omitempty"`
 	Conditions []ConditionItem `json:"conditions"`
 	Actions    []ActionItem    `json:"actions"`
 }
 
+// ConditionItem represnts one condition
 type ConditionItem map[string]string
 
+// GetType retrurn the type of the condition
 func (p ConditionItem) GetType() string {
 	if val, ok := p["type"]; ok {
 		return val
@@ -44,8 +50,10 @@ func (p ConditionItem) GetType() string {
 	return ""
 }
 
+// ActionItem represnts a single action
 type ActionItem map[string]string
 
+// GetType retrurn the type of the action
 func (p ActionItem) GetType() string {
 	if val, ok := p["type"]; ok {
 		return val

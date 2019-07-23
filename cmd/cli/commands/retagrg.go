@@ -52,8 +52,8 @@ var resourceGroupTagCommand = &cobra.Command{
 		}
 
 		rules := rules.TagRules{Rules: []rules.Rule{
-			rules.Rule{Name: "name", Conditions: []rules.ConditionItem{
-				rules.ConditionItem{"type": "rgEqual", "resourceGroup": resourceGroup},
+			{Name: "name", Conditions: []rules.ConditionItem{
+				{"type": "rgEqual", "resourceGroup": resourceGroup},
 			},
 				Actions: actions,
 			},

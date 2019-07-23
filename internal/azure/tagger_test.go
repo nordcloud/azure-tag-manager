@@ -4,49 +4,49 @@ import (
 	"context"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	"github.com/nordcloud/azure-tag-manager/internal/azure/rules"
 	"github.com/nordcloud/azure-tag-manager/mocks"
-	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
 	twoRulesWant = rules.TagRules{Rules: []rules.Rule{
-		rules.Rule{Name: "name", Conditions: []rules.ConditionItem{
-			rules.ConditionItem{"type": "tagEqual", "tag": "test", "value": "test"},
-			rules.ConditionItem{"type": "tagExists", "tag": "test"},
+		{Name: "name", Conditions: []rules.ConditionItem{
+			{"type": "tagEqual", "tag": "test", "value": "test"},
+			{"type": "tagExists", "tag": "test"},
 		},
 			Actions: []rules.ActionItem{
-				rules.ActionItem{"type": "addTag", "tag": "test2", "value": "test2"},
+				{"type": "addTag", "tag": "test2", "value": "test2"},
 			},
 		},
 	}}
 
 	deleteTag = rules.TagRules{Rules: []rules.Rule{
-		rules.Rule{Name: "name", Conditions: []rules.ConditionItem{
-			rules.ConditionItem{"type": "tagEqual", "tag": "test2", "value": "test2"},
+		{Name: "name", Conditions: []rules.ConditionItem{
+			{"type": "tagEqual", "tag": "test2", "value": "test2"},
 		},
 			Actions: []rules.ActionItem{
-				rules.ActionItem{"type": "delTag", "tag": "test3"},
+				{"type": "delTag", "tag": "test3"},
 			},
 		},
 	}}
 
 	deleteAllTags = rules.TagRules{Rules: []rules.Rule{
-		rules.Rule{Name: "name", Conditions: []rules.ConditionItem{
-			rules.ConditionItem{"type": "tagEqual", "tag": "test2", "value": "test2"},
+		{Name: "name", Conditions: []rules.ConditionItem{
+			{"type": "tagEqual", "tag": "test2", "value": "test2"},
 		},
 			Actions: []rules.ActionItem{
-				rules.ActionItem{"type": "cleanTags"},
+				{"type": "cleanTags"},
 			},
 		},
 	}}
 )
 
 var testResources = []Resource{
-	Resource{ID: "1", Region: "westeurope", Tags: map[string]*string{"test": String("test")}, ResourceGroup: String("test"), Name: String("name")},
-	Resource{ID: "2", Region: "westeurope", Tags: map[string]*string{"test2": String("test2"), "test3": String("test3")}, ResourceGroup: String("te3st"), Name: String("name2")},
-	Resource{ID: "3", Region: "easteurope", Tags: map[string]*string{"test-region": String("other"), "othertest": String("test56")}, ResourceGroup: String("rg2"), Name: String("name3")},
+	{ID: "1", Region: "westeurope", Tags: map[string]*string{"test": String("test")}, ResourceGroup: String("test"), Name: String("name")},
+	{ID: "2", Region: "westeurope", Tags: map[string]*string{"test2": String("test2"), "test3": String("test3")}, ResourceGroup: String("te3st"), Name: String("name2")},
+	{ID: "3", Region: "easteurope", Tags: map[string]*string{"test-region": String("other"), "othertest": String("test56")}, ResourceGroup: String("rg2"), Name: String("name3")},
 }
 
 func TestTagger_ExecuteActions(t *testing.T) {

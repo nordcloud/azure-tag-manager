@@ -10,9 +10,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type ActionExecution struct {
-}
-
 const (
 	usageMappingFile = "Location of the tag rules definition (json)"
 	usageDryRun      = "The tagger will not execute any actions"

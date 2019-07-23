@@ -61,25 +61,25 @@ rules:
 			}`
 	empty      = `{}`
 	onlyDryRun = `{"dryrun": true}`
-	wrongJson  = `{ew2`
+	wrongJSON  = `{ew2`
 	wrongYaml  = `223322`
 )
 
 var (
 	twoRulesWant = TagRules{Rules: []Rule{
-		Rule{Name: "name", Conditions: []ConditionItem{
-			ConditionItem{"type": "tagEqual", "tag": "test", "value": "test"},
-			ConditionItem{"type": "tagExists", "tag": "test"},
+		{Name: "name", Conditions: []ConditionItem{
+			{"type": "tagEqual", "tag": "test", "value": "test"},
+			{"type": "tagExists", "tag": "test"},
 		},
 			Actions: []ActionItem{
-				ActionItem{"type": "addTag", "tag": "test", "value": "test"},
+				{"type": "addTag", "tag": "test", "value": "test"},
 			},
 		},
 	}}
 )
 
-var dryRunFalse bool = false
-var dryRunTrue bool = true
+var dryRunFalse = false
+var dryRunTrue = true
 
 func TestNewFromString(t *testing.T) {
 	type args struct {
@@ -95,7 +95,7 @@ func TestNewFromString(t *testing.T) {
 		{name: "only dryrun defined", args: args{rulesDef: onlyDryRun}, want: TagRules{DryRun: &dryRunTrue}, wantErr: false},
 		{name: "one rule", args: args{rulesDef: two}, want: twoRulesWant, wantErr: false},
 		{name: "one rule yaml", args: args{rulesDef: yamlTwo}, want: twoRulesWant, wantErr: false},
-		{name: "wrong json", args: args{rulesDef: wrongJson}, want: TagRules{}, wantErr: true},
+		{name: "wrong json", args: args{rulesDef: wrongJSON}, want: TagRules{}, wantErr: true},
 		{name: "wrong yaml", args: args{rulesDef: wrongYaml}, want: TagRules{}, wantErr: true},
 	}
 
