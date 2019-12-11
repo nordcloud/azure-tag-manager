@@ -14,7 +14,9 @@ pool:
 variables:
   GOBIN:  '$(GOPATH)/bin' # Go binaries path
   GOROOT: '/usr/local/go1.11' # Go installation path
-  GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
+  GOPATH: '/gopath' # Go workspace path
+  GOARCH: amd64
+  GO111MODULE: on
 
 steps:
 - script: |
@@ -34,7 +36,6 @@ steps:
     set -e -x
     APP_VERSION=$(git describe --tags | tr - ' ' | awk '// {print $2}' || echo $(Build.BuildId)) 
     echo ${APP_VERSION}
-    export GOARCH=amd64
     export GOOS=darwin 
     go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
     export GOOS=linux 
@@ -43,6 +44,7 @@ steps:
     go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
     ls -la $(Build.ArtifactStagingDirectory)
   displayName: 'Build'
+  
 
 - task: GitHubRelease@0
   displayName: ‘Create GitHub Release’
