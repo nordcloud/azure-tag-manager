@@ -3,17 +3,12 @@
 # Add steps that test, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/go
 
-trigger:
-- master
-- release/*
-
-
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
   GOBIN:  '$(GOPATH)/bin' # Go binaries path
-  GOROOT: '/usr/local/go1.11' # Go installation path
+  GOROOT: '/usr/local/go1.13' # Go installation path
   GOPATH: '/gopath' # Go workspace path
   GOARCH: amd64
   GO111MODULE: on
@@ -28,6 +23,13 @@ steps:
     echo '##vso[task.prependpath]$(GOROOT)/bin'
   displayName: 'Set up the Go workspace'
 
+- task: Cache@2
+  inputs:
+    key: 'go | "$(Agent.OS)" | go.sum | go.mod'
+    restoreKeys: |
+      go | "$(Agent.OS)" | go.sum
+    path: $(GOPATH)/pkg/mod
+  displayName: Cache Go Mod
 
 - script: go test -v ./...
   displayName: 'Run tests and get deps'
@@ -35,18 +37,20 @@ steps:
 - script: |
     set -e -x
     APP_VERSION=$(git describe --tags | tr - ' ' | awk '// {print $2}' || echo $(Build.BuildId)) 
-    echo ${APP_VERSION}
     export GOOS=darwin 
-    go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
+    go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH} cmd/cli/main.go
     export GOOS=linux 
-    go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
+    go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH} cmd/cli/main.go
     export GOOS=windows 
-    go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH}-${APP_VERSION} cmd/cli/main.go
+    go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH} cmd/cli/main.go
     ls -la $(Build.ArtifactStagingDirectory)
   displayName: 'Build'
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))
+
   
 
 - task: GitHubRelease@0
+  condition: and(succeeded(), and(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
   displayName: ‘Create GitHub Release’
   inputs:
     action: 'create'
