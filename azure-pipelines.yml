@@ -45,12 +45,12 @@ steps:
     go build -ldflags "-X main.version=${APP_VERSION}" -o $(Build.ArtifactStagingDirectory)/azure-tag-manager-${GOOS}-${GOARCH} cmd/cli/main.go
     ls -la $(Build.ArtifactStagingDirectory)
   displayName: 'Build'
-  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release'))
 
   
 
 - task: GitHubRelease@0
-  condition: and(succeeded(), and(startsWith(variables['Build.SourceBranch'], 'refs/heads/release'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')))
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release'))
   displayName: ‘Create GitHub Release’
   inputs:
     action: 'create'
