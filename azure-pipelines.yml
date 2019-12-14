@@ -46,9 +46,7 @@ steps:
     ls -la $(Build.ArtifactStagingDirectory)
   displayName: 'Build'
   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release'), not(eq(variables['Build.Reason'], 'PullRequest')))
-
   
-
 - task: GitHubRelease@0
   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release'), not(eq(variables['Build.Reason'], 'PullRequest')))
   displayName: ‘Create GitHub Release’
