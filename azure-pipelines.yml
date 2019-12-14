@@ -50,7 +50,7 @@ steps:
   
 
 - task: GitHubRelease@0
-  condition: and(succeeded(), and(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')))
+  condition: and(succeeded(), and(startsWith(variables['Build.SourceBranch'], 'refs/heads/release'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')))
   displayName: ‘Create GitHub Release’
   inputs:
     action: 'create'
